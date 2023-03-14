@@ -10,6 +10,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.io.File;
@@ -26,7 +27,17 @@ import java.util.logging.Logger;
 public class FrontServlet extends HttpServlet {
     HashMap<String,Mapping> MappingUrls;
     
-    public ArrayList<Class> findClasses(File directory, String packageName) throws ClassNotFoundException{
+//SETTERS    
+    public void setMappingUrls(HashMap<String, Mapping> MappingUrls){
+        this.MappingUrls = MappingUrls;
+    }
+    
+//GETTERS
+    public HashMap<String, Mapping> getMappingUrls() {
+        return MappingUrls;
+    }
+//METHODS
+    public ArrayList<Class> findClasses(File directory, String packageName) throws ClassNotFoundException {
         ArrayList<Class> classes = new ArrayList<Class>();
         if (!directory.exists())
         {
@@ -76,7 +87,7 @@ public class FrontServlet extends HttpServlet {
     public void init() throws ServletException{
         HashMap<String,Mapping> temp = new HashMap<String,Mapping>();
         try{
-            ArrayList<Class> list = getClasses("src");
+            ArrayList<Class> list = getClasses("etu2060");
             for(Class element : list){
                Method[] methods = element.getDeclaredMethods();
                for(Method m : methods){
@@ -86,6 +97,7 @@ public class FrontServlet extends HttpServlet {
                    }
                }
             }
+            this.setMappingUrls(temp);
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(FrontServlet.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
