@@ -12,6 +12,7 @@ public class Mapping {
     String className;
     String methods;
 
+//GETTERS
     public String getClassName() {
         return className;
     }
@@ -20,6 +21,7 @@ public class Mapping {
         return methods;
     }
 
+//SETTERS
     public void setClassName(String className) {
         this.className = className;
     }
@@ -27,7 +29,8 @@ public class Mapping {
     public void setMethods(String methods) {
         this.methods = methods;
     }
-
+    
+//CONSTRUCTOR
     public Mapping(String className, String methods) {
         this.setClassName(className);
         this.setMethods(methods);
