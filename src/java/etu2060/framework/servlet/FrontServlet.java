@@ -10,7 +10,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.io.File;
@@ -87,7 +86,11 @@ public class FrontServlet extends HttpServlet {
     public void init() throws ServletException{
         HashMap<String,Mapping> temp = new HashMap<String,Mapping>();
         try{
+<<<<<<< Updated upstream:src/java/etu2060/framework/servlet/FrontServlet.java
             ArrayList<Class> list = getClasses("etu2060");
+=======
+            ArrayList<Class> list = getClasses(getInitParameter("modelPackage").trim());
+>>>>>>> Stashed changes:Framework/src/java/etu2060/framework/servlet/FrontServlet.java
             for(Class element : list){
                Method[] methods = element.getDeclaredMethods();
                for(Method m : methods){
