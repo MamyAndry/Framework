@@ -108,16 +108,15 @@ public class FrontServlet extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
         try{
-            String values = request.getRequestURI();
-            out.print(values);
+            String values[] = request.getRequestURI().split("/");
+            String url = values[values.length-1];
+            out.print(url);
             out.print("<br>");
-//            out.print("Coucouuu");
-//            HashMap<String,Mapping> lst = this.getMappingUrls();
-            out.println(this.getMappingUrls());
-            for(String key : this.getMappingUrls().keySet()){
-                
-                System.out.print("key = "+key+"huhuhuh<br>");
-//                System.out.print("value = "+this.getMappingUrls().get(key));
+            HashMap<String,Mapping> lst = this.getMappingUrls();
+            out.println(lst);
+            if(lst.containsKey(url)){
+                System.out.print("value = "+lst.get(url));
+                out.print("Coucouuu");
             }
         }
         catch(Exception e){
