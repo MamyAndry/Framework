@@ -6,6 +6,8 @@ package etu2060.framework.servlet;
 
 import annotation.AnnotationUrl;
 import etu2060.framework.Mapping;
+import java.lang.reflect.*;
+import etu2060.framework.modelView.ModelView;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -109,13 +111,16 @@ public class FrontServlet extends HttpServlet {
         PrintWriter out = response.getWriter();
         try{
             String values[] = request.getRequestURI().split("/");
-            String url = values[values.length-1];
-            out.print(url);
+            String key = values[values.length-1];
+            out.print(key);
             out.print("<br>");
             HashMap<String,Mapping> lst = this.getMappingUrls();
             out.println(lst);
-            if(lst.containsKey(url)){
-                System.out.print("value = "+lst.get(url));
+            if(lst.containsKey(key)){
+                Mapping map = lst.get(key);
+                ModelView view = ModelView(Class.forName(map.getClassName()).getClass().getDeclaredMethods(map.getMethods()).invoke());
+                request.dispatch(view);
+//                System.out.print("value = "+lst.get(key));
                 out.print("Coucouuu");
             }
         }
