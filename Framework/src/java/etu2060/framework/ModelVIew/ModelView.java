@@ -26,7 +26,7 @@ public class ModelView {
     }
     
     public ModelView(String view) {
-        this.view = view;
+        this.setView(view);
     }
 
 

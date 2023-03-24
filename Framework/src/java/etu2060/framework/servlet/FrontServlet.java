@@ -115,10 +115,10 @@ public class FrontServlet extends HttpServlet {
             out.print("<br>");
             HashMap<String,Mapping> lst = this.getMappingUrls();
             out.print(lst);
-//            for(int i = 0 ; i < lst.size() ; i++){
-//                out.print("key = "+lst);
-//                out.print("value = "+lst.get)
-//            }
+            for(String key : lst.keySet()){
+                out.print("key = "+key);
+                out.print("value = "+lst.get(key));
+            }
         }
         catch(Exception e){
             out.print(e.getMessage());
