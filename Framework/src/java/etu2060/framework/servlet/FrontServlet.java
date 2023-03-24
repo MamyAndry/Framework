@@ -5,12 +5,11 @@
 package etu2060.framework.servlet;
 
 import annotation.AnnotationUrl;
-import framework.Mapping;
+import etu2060.framework.Mapping;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.io.File;
@@ -39,28 +38,26 @@ public class FrontServlet extends HttpServlet {
 //METHODS
     public ArrayList<Class> findClasses(File directory, String packageName) throws ClassNotFoundException {
         ArrayList<Class> classes = new ArrayList<Class>();
-        if (!directory.exists())
-        {
+        System.out.println("directory : "+directory+" packageName : "+packageName);
+        if (!directory.exists()){
             return classes;
         }
         File[] files = directory.listFiles();
-        for (File file : files)
-        {
-            if (file.isDirectory())
-            {
+        for (File file : files){
+            if (file.isDirectory()){
                 classes.addAll(findClasses(file, packageName + "." + file.getName()));
-            }
-            else if (file.getName().endsWith(".class"))
-            {
+            }else if (file.getName().endsWith(".class")){
                 classes.add(Class.forName(packageName + '.' + file.getName().substring(0, file.getName().length() - 6)));
             }
         }
+        System.out.println("classes : "+classes);
         return classes;
     }
 
     public ArrayList<Class> getClasses(String packageName) throws ClassNotFoundException, IOException, URISyntaxException{
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         String path = packageName.replace('.', '/');
+        System.out.println(path);
         Enumeration<URL> resources = classLoader.getResources(path);
         ArrayList<File> dirs = new ArrayList<File>();
         while (resources.hasMoreElements())
@@ -68,25 +65,23 @@ public class FrontServlet extends HttpServlet {
             URL resource = resources.nextElement();
             URI uri = new URI(resource.toString());
             dirs.add(new File(uri.getPath()));
+            System.out.println(resource);
         }
         ArrayList<Class> classes = new ArrayList<Class>();
-        System.out.println(dirs);
         for (File directory : dirs)
         {
             classes.addAll(findClasses(directory, packageName));
         }
-        System.out.println(classes);
+//        System.out.println(classes.size());
         return classes;
     }
 
-    public FrontServlet() {
-    }
 
     @Override
     public void init() throws ServletException{
         HashMap<String,Mapping> temp = new HashMap<String,Mapping>();
         try{
-            ArrayList<Class> list = getClasses("sorona");
+            ArrayList<Class> list = getClasses(getInitParameter("modelPackage").trim());
             for(Class element : list){
                Method[] methods = element.getDeclaredMethods();
                for(Method m : methods){
