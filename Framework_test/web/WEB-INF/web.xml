@@ -5,7 +5,7 @@
         <servlet-class>etu2060.framework.servlet.FrontServlet</servlet-class>
         <init-param>
             <param-name>modelPackage</param-name>
-            <param-value>etu2060</param-value>
+            <param-value>sorona</param-value>
         </init-param>
     </servlet>
     <servlet-mapping>

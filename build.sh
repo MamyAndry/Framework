@@ -4,6 +4,7 @@ frameworktestPATH=~/Documents/Framework/Framework_test/build/web/WEB-INF/classes
 cd $frameworkPATH
 jar -cf framework.jar .
 cp framework.jar $apachePATH/lib
-# cd $frameworktestPATH
-# war -cf classes.war ~/Documents/Framework/Framework_test/build/web/WEB-INF
-# mv classes.war $apachePATH/classes
+cp framework.jar ~/Documents/LIBRARY
+cd $frameworktestPATH
+jar -cf classes.war .
+cp classes.war $apachePATH/classes

@@ -38,7 +38,7 @@ public class FrontServlet extends HttpServlet {
 //METHODS
     public ArrayList<Class> findClasses(File directory, String packageName) throws ClassNotFoundException {
         ArrayList<Class> classes = new ArrayList<Class>();
-        System.out.println("directory : "+directory+" packageName : "+packageName);
+//        System.out.println("directory : "+directory+" packageName : "+packageName);
         if (!directory.exists()){
             return classes;
         }
@@ -50,26 +50,24 @@ public class FrontServlet extends HttpServlet {
                 classes.add(Class.forName(packageName + '.' + file.getName().substring(0, file.getName().length() - 6)));
             }
         }
-        System.out.println("classes : "+classes);
+//        System.out.println("classes : "+classes);
         return classes;
     }
 
     public ArrayList<Class> getClasses(String packageName) throws ClassNotFoundException, IOException, URISyntaxException{
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         String path = packageName.replace('.', '/');
-        System.out.println(path);
+//        System.out.println(path);
         Enumeration<URL> resources = classLoader.getResources(path);
         ArrayList<File> dirs = new ArrayList<File>();
-        while (resources.hasMoreElements())
-        {
+        while (resources.hasMoreElements()){
             URL resource = resources.nextElement();
             URI uri = new URI(resource.toString());
             dirs.add(new File(uri.getPath()));
-            System.out.println(resource);
+//            System.out.println(resource);
         }
         ArrayList<Class> classes = new ArrayList<Class>();
-        for (File directory : dirs)
-        {
+        for (File directory : dirs){
             classes.addAll(findClasses(directory, packageName));
         }
 //        System.out.println(classes.size());
@@ -113,12 +111,14 @@ public class FrontServlet extends HttpServlet {
             String values = request.getRequestURI();
             out.print(values);
             out.print("<br>");
-            HashMap<String,Mapping> lst = this.getMappingUrls();
-            out.print(lst);
-//            for(int i = 0 ; i < lst.size() ; i++){
-//                out.print("key = "+lst);
-//                out.print("value = "+lst.get)
-//            }
+//            out.print("Coucouuu");
+//            HashMap<String,Mapping> lst = this.getMappingUrls();
+            out.println(this.getMappingUrls());
+            for(String key : this.getMappingUrls().keySet()){
+                
+                System.out.print("key = "+key+"huhuhuh<br>");
+//                System.out.print("value = "+this.getMappingUrls().get(key));
+            }
         }
         catch(Exception e){
             out.print(e.getMessage());
