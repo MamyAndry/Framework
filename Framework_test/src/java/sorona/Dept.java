@@ -2,6 +2,7 @@ package sorona;
         
 import annotation.AnnotationUrl;
 import etu2060.framework.ModelView;
+import java.util.HashMap;
 
 public class Dept {
     int id = 2;
@@ -9,6 +10,9 @@ public class Dept {
     @AnnotationUrl(url = "dept-all")
     public ModelView findAll(){
         ModelView m = new ModelView("dept.jsp");
+        HashMap<String,Object> lst = new HashMap<String,Object>();
+        m.setData(lst);
+        m.addItem("mpampiasa",1);
         return m;
     }
 }

@@ -1,31 +1,37 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package etu2060.framework;
 
-/**
- *
- * @author mamisoa
- */
+import java.util.HashMap;
+
+
 public class ModelView {
-    String view;
+    String url;
+    HashMap<String,Object> data;
 
 //GETTERS
-    public String getView() {
-        return view;
+    public String getUrl() {
+        return url;
+    }
+    public HashMap<String, Object> getData(){
+        return this.data;
     }
     
 //SETTERS
-    public void setView(String view) {
-        this.view = view;
+    public void setUrl(String view) {
+        this.url = view;
+    }
+    public void setData(HashMap<String,Object> lst){
+        this.data = lst;
     }
     
 //CONSTRUCTOR
     public ModelView(String v) {
-        this.setView(v);
+        this.setUrl(v);
     }
-    public ModelView() {
+    public ModelView(){}
+
+//METHOD
+    public void addItem(String key , Object value){
+        this.getData().put(key,value);
     }
     
     
