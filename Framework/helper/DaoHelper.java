@@ -4,6 +4,7 @@ import java.lang.reflect.*;
 //import java.util.Vector;
 import annotation.*;
 import java.util.ArrayList;
+import java.lang.reflect.*;
 
 public class DaoHelper{
 
@@ -13,10 +14,10 @@ public class DaoHelper{
         return text.substring(0,1).toUpperCase().concat(text.substring(1));
     }
 
-    public static String getTableName(String str) { //Return the name of the Table 
+    public static String getTableName(String str) { //Return the name of the Table
         return str.split("\\.")[str.split("\\.").length - 1];
     }
-    
+
     public static Method[] getGetters(Object obj) throws Exception{
         String[] list = getFields(obj);
         Method[] res = new Method[list.length];
@@ -26,14 +27,14 @@ public class DaoHelper{
         return res;
     }
 
-    public static Method[] getSetters(Object obj,Object argument) throws Exception{
-        String[] list = getFields(obj);
-        Method[] res = new Method[list.length];
-        for(int i = 0 ; i < list.length ; i++){
-            res[i] = obj.getClass().getMethod("set" + list[i] , argument.getClass());
-        }
-        return res;
-    }
+    // public static Method[] getSetters(Object obj,Object argument) throws Exception{
+    //     String[] list = getFields(obj);
+    //     Method[] res = new Method[list.length];
+    //     for(int i = 0 ; i < list.length ; i++){
+    //         res[i] = obj.getClass().getMethod("set" + list[i] , argument.getClass());
+    //     }
+    //     return res;
+    // }
 
     public static String[] convertIntoArray(ArrayList<String> list){
         String[] res = new String[list.size()];
@@ -43,7 +44,7 @@ public class DaoHelper{
         return res;
 
     }
-    
+
     public static String[] getFields(Object obj){
         ArrayList<String> res = new ArrayList<String>();
         for(int i = 0 ; i < obj.getClass().getDeclaredFields().length ; i++){
@@ -53,7 +54,17 @@ public class DaoHelper{
         return convertIntoArray(res);
 
     }
-    
+
+    public static ArrayList<Field> getColumnFields(Object obj){
+        ArrayList<Field> res = new ArrayList<Field>();
+        for(int i = 0 ; i < obj.getClass().getDeclaredFields().length ; i++){
+            if(obj.getClass().getDeclaredFields()[i].isAnnotationPresent(AnnotationColumn.class))
+                res.add(obj.getClass().getDeclaredFields()[i]);
+        }
+        return res;
+
+    }
+
     public static String[] getColumns(Object obj){
         String[] res = new String[obj.getClass().getDeclaredFields().length];
         for(int i = 0 ; i < obj.getClass().getDeclaredFields().length ; i++){

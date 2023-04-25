@@ -1,14 +1,14 @@
 tomcat=$HOME/Documents/apache-tomcat-10.0.27/bin
 tomcatWebapps=~/Documents/apache-tomcat-10.0.27/webapps
 frameworkPATH=~/Documents/Framework/Framework/build/web/WEB-INF/classes/
-frameworkJavaPATH=~/Documents/Framework/Framework/src/java/
+frameworkJavaPATH=~/Documents/Framework/Framework/
 frameworktestPATH=~/Documents/Framework/Framework_test/web/
 frameworktestJavaPATH=~/Documents/Framework/Framework_test/src/java/
 lib=$HOME/Documents/LIBRARY
 
 cd $frameworkJavaPATH
 
-find -name '*.java' > src.txt
+    find -name '*.java' > src.txt
 mkdir temp
 javac -cp $lib/servlet-api.jar -d temp @src.txt
 rm src.txt
