@@ -8,6 +8,7 @@ import annotation.AnnotationUrl;
 import etu2060.framework.Mapping;
 import java.lang.reflect.*;
 import etu2060.framework.ModelView;
+import helper.DaoHelper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -130,7 +131,9 @@ public class FrontServlet extends HttpServlet {
         out.println("<body>");
         out.println("<h3>Servlet FrontServlet at " + request.getContextPath() + "</h3>");
         try{
-            String values[] = request.getRequestURI().split("/");
+            String[] values = request.getRequestURI().split("/");
+            String[] query = request.getQueryString().split("&&");
+            out.print(query);
             String key = values[values.length-1];
             out.print("<p>");
             out.print(key);
@@ -146,6 +149,13 @@ public class FrontServlet extends HttpServlet {
                 String method = map.getMethods();
                 //  out.print("</br>"+method);
                 Object obj = Class.forName(map.getClassName()).getConstructor().newInstance();
+                for(String attribut : query){
+                    String[] temp = attribut.split("=");
+                        if(obj.getClass().getField(temp[0]) != null){
+                            Class<?> fieldType = obj.getClass().getField(temp[0]).getType();
+                            obj.getClass().getDeclaredMethod( "set" + temp[0] , fieldType ).invoke( obj , fieldType.cast(temp[1]) );
+                        }   
+                }
                 Method m = obj.getClass().getDeclaredMethod(method);
                 ModelView view = (ModelView) m.invoke( obj , (Object[]) null);
                 if(view.getData() != null){
