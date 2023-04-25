@@ -1,10 +1,3 @@
-<%-- 
-    Document   : emp
-    Created on : Mar 24, 2023, 10:36:57 AM
-    Author     : mamisoa
---%>
-
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
     <head>
@@ -13,5 +6,10 @@
     </head>
     <body>
         <h1>IT WORKS!!!</h1>
+        <%
+            out.print(request.getAttribute("nom"));
+            out.print("<br>");
+            out.print(request.getAttribute("prenom"));
+        %>
     </body>
 </html>

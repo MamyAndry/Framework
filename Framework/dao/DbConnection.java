@@ -12,12 +12,12 @@ public class DbConnection{
     public void setUsername(String u){this.username=u;}
     public void setPassword(String p){this.password=p;}
     public void setDatabase(String d){this.database=d;}
-    
+
     //GETTERS
     public String getUsername(){return this.username;}
     public String getPassword(){return this.password;}
     public String getDatabase(){return this.database;}
-    
+
     //CONSTRUCTOR
     public DbConnection(){
         String[] values = XmlParser.getValues();
@@ -25,11 +25,15 @@ public class DbConnection{
         this.setPassword(values[2]);
         this.setDatabase(values[0]);
     }
-
+    public DbConnection(String username , String password , String database){
+        this.setUsername(username);
+        this.setPassword(password);
+        this.setDatabase(database);
+    }
     //METHODS
-    public Connection connectToOracle(){ 
-        Connection con=null;    
-        try{  
+    public Connection connectToOracle(){
+        Connection con=null;
+        try{
             Class.forName("oracle.jdbc.driver.OracleDriver");
             con=DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:orcl",this.getUsername(),this.getPassword());
 

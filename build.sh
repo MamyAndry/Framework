@@ -8,7 +8,7 @@ lib=$HOME/Documents/LIBRARY
 
 cd $frameworkJavaPATH
 
-find -name '*.java' > src.txt
+    find -name '*.java' > src.txt
 mkdir temp
 javac -cp $lib/servlet-api.jar -d temp @src.txt
 rm src.txt
