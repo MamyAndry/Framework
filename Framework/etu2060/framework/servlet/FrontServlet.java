@@ -8,7 +8,7 @@ import annotation.AnnotationUrl;
 import etu2060.framework.Mapping;
 import java.lang.reflect.*;
 import etu2060.framework.ModelView;
-import helper.DaoHelper;
+import helper.Helper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,6 +26,7 @@ import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.sql.Date;
+import java.util.function.*;
 
 public class FrontServlet extends HttpServlet {
     HashMap<String,Mapping> MappingUrls;
@@ -83,7 +84,7 @@ public class FrontServlet extends HttpServlet {
     public void init() throws ServletException{
         HashMap<String,Mapping> temp = new HashMap<String,Mapping>();
         try{
-            System.out.println("modelPackage = " + getInitParameter("modelPackage"));
+            // System.out.println("modelPackage = " + getInitParameter("modelPackage"));
             ArrayList<String> list = getClasses(getInitParameter("modelPackage").trim());
             for(String element : list){
                Method[] methods = Class.forName(element).getDeclaredMethods();
@@ -112,8 +113,51 @@ public class FrontServlet extends HttpServlet {
         }
     }
 
+    public static getFunctionArgument(HttpServletRequest request , Method method , Object obj){
+        ArrayList<Object> lst = new ArrayList<Object>();
+        Enumeration<String> query = request.getParameterNames();
+        while(query.hasMoreElements()){
+            String attribut = query.nextElement();
+            String value = request.getParameter(attribut);
+            for(int i = 0 ; i < obj.getClass().getDeclaredFields().length ; i++){
+                if(obj.getClass().getDeclaredFields()[i].getName().equals(attribut)){
+                    Class<?> fieldType = obj.getClass().getDeclaredFields()[i].getType();
+                    if(fieldType.getName().equals("int"))
+                        obj.getClass().getDeclaredMethod("set" + Helper.turnIntoCapitalLetter(attribut) , fieldType ).invoke( obj , Integer.parseInt(value) );
+                    else if(fieldType.getName().equals("double"))
+                        obj.getClass().getDeclaredMethod("set" + Helper.turnIntoCapitalLetter(attribut) , fieldType ).invoke( obj , Double.parseDouble(value) );
+                    else if(fieldType.getName().equals("java.util.Date") || fieldType.getName().equals("java.sql.Date"))
+                        obj.getClass().getDeclaredMethod("set" + Helper.turnIntoCapitalLetter(attribut) , fieldType ).invoke( obj , Date.valueOf(value) );
+                    else
+                        obj.getClass().getDeclaredMethod("set" + Helper.turnIntoCapitalLetter(attribut) , fieldType ).invoke( obj , new String(value) );
+                }
+            }
+        }
+        return obj;
+    }
 
-
+    public static Object setDynamic(HttpServletRequest request , String className , Object obj) throws Exception{
+        obj = Class.forName(className).getConstructor().newInstance();
+        Enumeration<String> query = request.getParameterNames();
+        while(query.hasMoreElements()){
+            String attribut = query.nextElement();
+            String value = request.getParameter(attribut);
+            for(int i = 0 ; i < obj.getClass().getDeclaredFields().length ; i++){
+                if(obj.getClass().getDeclaredFields()[i].getName().equals(attribut)){
+                    Class<?> fieldType = obj.getClass().getDeclaredFields()[i].getType();
+                    if(fieldType.getName().equals("int"))
+                        obj.getClass().getDeclaredMethod("set" + Helper.turnIntoCapitalLetter(attribut) , fieldType ).invoke( obj , Integer.parseInt(value) );
+                    else if(fieldType.getName().equals("double"))
+                        obj.getClass().getDeclaredMethod("set" + Helper.turnIntoCapitalLetter(attribut) , fieldType ).invoke( obj , Double.parseDouble(value) );
+                    else if(fieldType.getName().equals("java.util.Date") || fieldType.getName().equals("java.sql.Date"))
+                        obj.getClass().getDeclaredMethod("set" + Helper.turnIntoCapitalLetter(attribut) , fieldType ).invoke( obj , Date.valueOf(value) );
+                    else
+                        obj.getClass().getDeclaredMethod("set" + Helper.turnIntoCapitalLetter(attribut) , fieldType ).invoke( obj , new String(value) );
+                }
+            }
+        }
+        return obj;
+    }
     /**
      * @param request
      * @param response
@@ -136,35 +180,15 @@ public class FrontServlet extends HttpServlet {
             // out.print(query);
             String key = values[values.length-1];
             out.print("<p>");
-            out.print(key);
-            out.print("</br>");
             out.println(this.getMappingUrls());
-            out.print("</br>");
             out.print("</p>");
-             if(this.getMappingUrls().containsKey(key)){
+            if(this.getMappingUrls().containsKey(key)){
                 Mapping map = this.getMappingUrls().get(key);
                 String method = map.getMethods();
                 Object obj = Class.forName(map.getClassName()).getConstructor().newInstance();
-                out.print(obj.getClass()+"</br>");
+                // out.print(obj.getClass()+"</br>");
                 if(request.getQueryString() != null){
-                    Enumeration<String> query = request.getParameterNames();
-                    while(query.hasMoreElements()){
-                        String attribut = query.nextElement();
-                        String value = request.getParameter(attribut);
-                        for(int i = 0 ; i < obj.getClass().getDeclaredFields().length ; i++){
-                            if(obj.getClass().getDeclaredFields()[i].getName().equals(value)){
-                                Class<?> fieldType = obj.getClass().getDeclaredFields()[i].getType();
-                                if(fieldType.getName().equals("int"))
-                                    obj.getClass().getDeclaredMethod("set" + DaoHelper.turnIntoCapitalLetter(attribut) , fieldType ).invoke( obj , Integer.parseInt(value) );
-                                else if(fieldType.getName().equals("double"))
-                                    obj.getClass().getDeclaredMethod("set" + DaoHelper.turnIntoCapitalLetter(attribut) , fieldType ).invoke( obj , Double.parseDouble(value) );
-                                else if(fieldType.getName().equals("java.util.Date") || fieldType.getName().equals("java.sql.Date"))
-                                    obj.getClass().getDeclaredMethod("set" + DaoHelper.turnIntoCapitalLetter(attribut) , fieldType ).invoke( obj , Date.valueOf(value) );
-                                else
-                                    obj.getClass().getDeclaredMethod("set" + DaoHelper.turnIntoCapitalLetter(attribut) , fieldType ).invoke( obj , fieldType.cast(value) );
-                            }
-                        }
-                    }
+                    obj = setDynamic(request , map.getClassName() , obj);
                 }
                 Method m = obj.getClass().getDeclaredMethod(method);
                 ModelView view = (ModelView) m.invoke( obj , (Object[]) null);
@@ -173,8 +197,8 @@ public class FrontServlet extends HttpServlet {
                         request.setAttribute(dataKey , view.getData().get(dataKey));
                     }
                 }
-               request.getRequestDispatcher(view.getUrl()).forward(request,response);
-             }
+                request.getRequestDispatcher(view.getUrl()).forward(request,response);
+        }
         }catch(Exception e){
             e.printStackTrace(out);
         }
@@ -199,5 +223,7 @@ public class FrontServlet extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
+
+
 
 }
