@@ -1,12 +1,11 @@
 package helper;
 
 import java.lang.reflect.*;
-//import java.util.Vector;
 import annotation.*;
 import java.util.ArrayList;
 import java.lang.reflect.*;
 
-public class DaoHelper{
+public class Helper{
 
 //METHODS
 
