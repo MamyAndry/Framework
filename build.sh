@@ -21,7 +21,7 @@ mv framework.jar ~/Documents/LIBRARY
 cd $frameworkTestCodePATH
 
 find -name '*.java' > src.txt
-javac -cp $frameworkTestWebPATH/WEB-INF/lib/framework.jar -d $frameworkTestWebPATH/WEB-INF/classes @src.txt
+javac -parameters -cp $frameworkTestWebPATH/WEB-INF/lib/framework.jar -d $frameworkTestWebPATH/WEB-INF/classes @src.txt
 rm src.txt
 cd $frameworkTestWebPATH
 jar -cf Project.war .

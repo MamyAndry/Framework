@@ -24,6 +24,9 @@ public class Emp {
     public void setPrenom(String p){
         this.prenom = p;
     }
+    public void setId(int i){
+        this.id = i;
+    }
 
 //GETTERS
     public String getNom(){
@@ -31,6 +34,9 @@ public class Emp {
     }
     public String getPrenom(){
         return this.prenom;
+    }
+    public int getId(){
+        return this.id;
     }
 
 //CONSTRUCTOR
@@ -42,7 +48,15 @@ public class Emp {
     public ModelView findAll(){
         ModelView m = new ModelView("emp.jsp");
         return m;
+        }
+
+    @AnnotationUrl(url = "emp-one")
+    public ModelView find(String test){
+        ModelView m = new ModelView("emp2.jsp");
+        m.addItem("id", test);
+        return m;
     }
+
 
     @AnnotationUrl(url = "save-emp")
     public ModelView save(){

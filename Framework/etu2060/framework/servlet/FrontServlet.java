@@ -113,11 +113,10 @@ public class FrontServlet extends HttpServlet {
         }
     }
 
-    public static Object[] getFunctionArgument(HttpServletRequest request , Method method ){
+    public static ArrayList<Object> getFunctionArgument(HttpServletRequest request , Method method){
         ArrayList<Object> lst = new ArrayList<Object>();
         Enumeration<String> query = request.getParameterNames();
         Parameter[] param = method.getParameters();
-        Object[] args = new Object[param.length];
         while(query.hasMoreElements()){
             String attribut = query.nextElement();
             String value = request.getParameter(attribut);
@@ -125,17 +124,17 @@ public class FrontServlet extends HttpServlet {
                 if(param[i].getName().equals(attribut)){
                     Class<?> fieldType = param[i].getType();
                     if(fieldType.getName().equals("int"))
-                        args[i] = Integer.parseInt(value);
+                        lst.add(Integer.parseInt(value));
                     else if(fieldType.getName().equals("double"))
-                        args[i] = Double.parseDouble(value);
+                        lst.add(Double.parseDouble(value));
                     else if(fieldType.getName().equals("java.util.Date") || fieldType.getName().equals("java.sql.Date"))
-                        args[i] = Date.valueOf(value);
+                        lst.add(Date.valueOf(value));
                     else
-                        args[i] = new String(value);
+                        lst.add(value);
                 }
             }
         }
-        return args;
+        return lst;
     }
 
     public static Object setDynamic(HttpServletRequest request , String className , Object obj) throws Exception{
@@ -188,14 +187,26 @@ public class FrontServlet extends HttpServlet {
                 Mapping map = this.getMappingUrls().get(key);
                 String method = map.getMethods();
                 Object obj = Class.forName(map.getClassName()).getConstructor().newInstance();
-                Method m = obj.getClass().getDeclaredMethod(method);
-                Object[] args;
+                Method[] listMethod = obj.getClass().getDeclaredMethods();
+                Method m = null;
+                int i = 0;
+                while(listMethod[i].getName().equals(method)){
+                    m = listMethod[i];
+                    i++;
+                }
+                // out.print("<p>");
+                // out.print(m);
+                // out.print("</p>");
+                ArrayList<Object> args = new ArrayList<Object>();
                 // Verify if there are data sent
                 if(request.getQueryString() != null){
                     obj = setDynamic(request , map.getClassName() , obj);
                     args = getFunctionArgument( request , m);
+                    out.print("<p>");
+                    out.print(args);
+                    out.print("</p>");
                 }
-                ModelView view = (ModelView) m.invoke( obj , args);
+                ModelView view = (ModelView) m.invoke( obj , (Object[]) args.toArray());
                 if(view.getData() != null){
                     for(String dataKey : view.getData().keySet()){
                         request.setAttribute(dataKey , view.getData().get(dataKey));
