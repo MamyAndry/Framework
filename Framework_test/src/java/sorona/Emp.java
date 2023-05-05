@@ -9,7 +9,7 @@ import java.sql.*;
 @AnnotationTable()
 public class Emp {
     // @AnnotationColumn(isPrimaryKey=true)
-    int id = 1;
+    Integer id = 1;
 
     @AnnotationColumn()
     String nom;
@@ -24,7 +24,7 @@ public class Emp {
     public void setPrenom(String p){
         this.prenom = p;
     }
-    public void setId(int i){
+    public void setId(Integer i){
         this.id = i;
     }
 
@@ -35,7 +35,7 @@ public class Emp {
     public String getPrenom(){
         return this.prenom;
     }
-    public int getId(){
+    public Integer getId(){
         return this.id;
     }
 

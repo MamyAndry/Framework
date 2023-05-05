@@ -113,7 +113,7 @@ public class FrontServlet extends HttpServlet {
         }
     }
 
-    public static ArrayList<Object> getFunctionArgument(HttpServletRequest request , Method method){
+    public static ArrayList<Object> getFunctionArgument(HttpServletRequest request , Method method) throws Exception{
         ArrayList<Object> lst = new ArrayList<Object>();
         Enumeration<String> query = request.getParameterNames();
         Parameter[] param = method.getParameters();
@@ -123,14 +123,8 @@ public class FrontServlet extends HttpServlet {
             for(int i = 0 ; i < param.length ; i++){
                 if(param[i].getName().equals(attribut)){
                     Class<?> fieldType = param[i].getType();
-                    if(fieldType.getName().equals("int"))
-                        lst.add(Integer.parseInt(value));
-                    else if(fieldType.getName().equals("double"))
-                        lst.add(Double.parseDouble(value));
-                    else if(fieldType.getName().equals("java.util.Date") || fieldType.getName().equals("java.sql.Date"))
-                        lst.add(Date.valueOf(value));
-                    else
-                        lst.add(value);
+                    Object temp = fieldType.getDeclaredConstructor(String.class).newInstance(value);
+                    lst.add(temp);
                 }
             }
         }
@@ -146,14 +140,8 @@ public class FrontServlet extends HttpServlet {
             for(int i = 0 ; i < obj.getClass().getDeclaredFields().length ; i++){
                 if(obj.getClass().getDeclaredFields()[i].getName().equals(attribut)){
                     Class<?> fieldType = obj.getClass().getDeclaredFields()[i].getType();
-                    if(fieldType.getName().equals("int"))
-                        obj.getClass().getDeclaredMethod("set" + Helper.turnIntoCapitalLetter(attribut) , fieldType ).invoke( obj , Integer.parseInt(value) );
-                    else if(fieldType.getName().equals("double"))
-                        obj.getClass().getDeclaredMethod("set" + Helper.turnIntoCapitalLetter(attribut) , fieldType ).invoke( obj , Double.parseDouble(value) );
-                    else if(fieldType.getName().equals("java.util.Date") || fieldType.getName().equals("java.sql.Date"))
-                        obj.getClass().getDeclaredMethod("set" + Helper.turnIntoCapitalLetter(attribut) , fieldType ).invoke( obj , Date.valueOf(value) );
-                    else
-                        obj.getClass().getDeclaredMethod("set" + Helper.turnIntoCapitalLetter(attribut) , fieldType ).invoke( obj , new String(value) );
+                    Object temp = fieldType.getDeclaredConstructor(String.class).newInstance(value);
+                    obj.getClass().getDeclaredMethod("set" + Helper.turnIntoCapitalLetter(attribut) , fieldType ).invoke( obj , temp );
                 }
             }
         }
@@ -190,26 +178,24 @@ public class FrontServlet extends HttpServlet {
                 Method[] listMethod = obj.getClass().getDeclaredMethods();
                 Method m = null;
                 int i = 0;
-                while(listMethod[i].getName().equals(method)){
-                    m = listMethod[i];
+                while(!listMethod[i].getName().equals(method)){
                     i++;
                 }
-                // out.print("<p>");
-                // out.print(m);
-                // out.print("</p>");
+                m = listMethod[i];
                 ArrayList<Object> args = new ArrayList<Object>();
                 // Verify if there are data sent
-                if(request.getQueryString() != null){
+                if(request.getParameterNames().nextElement() != null){
                     obj = setDynamic(request , map.getClassName() , obj);
                     args = getFunctionArgument( request , m);
-                    out.print("<p>");
-                    out.print(args);
-                    out.print("</p>");
+
                 }
                 ModelView view = (ModelView) m.invoke( obj , (Object[]) args.toArray());
                 if(view.getData() != null){
                     for(String dataKey : view.getData().keySet()){
                         request.setAttribute(dataKey , view.getData().get(dataKey));
+                        out.print("<p>");
+                        out.println(dataKey);
+                        out.print("</p>");
                     }
                 }
                 request.getRequestDispatcher(view.getUrl()).forward(request,response);
