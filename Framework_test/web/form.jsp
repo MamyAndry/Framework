@@ -7,7 +7,7 @@
     </head>
     <body>
         <div>
-            <form method="get" action="save-emp">
+            <form method="post" action="save-emp">
                 <input type="text" name="nom" value="So">
                 <input type="text" name="prenom" value="Rona">
                 <input type="submit" value="Valider">
