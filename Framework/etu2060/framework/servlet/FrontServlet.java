@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package etu2060.framework.servlet;
 
 import annotation.AnnotationUrl;
@@ -82,7 +78,7 @@ public class FrontServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException{
-        HashMap<String,Mapping> temp = new HashMap<String,Mapping>();
+        HashMap<String,Mappin   g> temp = new HashMap<String,Mapping>();
         try{
             // System.out.println("modelPackage = " + getInitParameter("modelPackage"));
             ArrayList<String> list = getClasses(getInitParameter("modelPackage").trim());
@@ -189,8 +185,7 @@ public class FrontServlet extends HttpServlet {
                     args = getFunctionArgument( request , m);
 
                 }
-                ModelView view = (ModelView) m.invoke( obj , (Object[]) args.toArray());
-                if(view.getData() != null){
+                ModelView view = (ModelView) m.invoke( obj , (Object[]) args.toArray());if(view.getData() != null){
                     for(String dataKey : view.getData().keySet()){
                         request.setAttribute(dataKey , view.getData().get(dataKey));
                         out.print("<p>");
