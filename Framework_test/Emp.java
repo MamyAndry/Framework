@@ -44,13 +44,13 @@ public class Emp {
 
 //METHODS
 
-    @AnnotationUrl(url = "emp-all")
+    @AnnotationUrl(url = "emp-all.do")
     public ModelView findAll(){
         ModelView m = new ModelView("emp.jsp");
         return m;
         }
 
-    @AnnotationUrl(url = "emp-one")
+    @AnnotationUrl(url = "emp-one.do")
     public ModelView find(String test){
         ModelView m = new ModelView("emp2.jsp");
         m.addItem("id", test);
@@ -58,7 +58,7 @@ public class Emp {
     }
 
 
-    @AnnotationUrl(url = "save-emp")
+    @AnnotationUrl(url = "save-emp.do")
     public ModelView save(){
         ModelView m = new ModelView("emp.jsp");
         HashMap<String,Object> lst = new HashMap<String,Object>();
