@@ -14,9 +14,10 @@
     <body>
         <h1>DEPT WORKS!!!</h1>
         <%
-            //int nbr = Integer.parseInt(request.getAttribute("mpampiasa"));
-            //out.print(nbr); 
-            out.print(request.getAttribute("mpampiasa"));
+            int nbr = (int)(request.getAttribute("mpampiasa"));
+            out.print(nbr+"<br>"); 
+            out.print(nbr + 100); 
+            //out.print(request.getAttribute("mpampiasa"));
         %>
     </body>
 </html>
