@@ -7,20 +7,13 @@ cd $frameworkTestPATH
 
 find -name '*.java' > src.txt
 
-if [ -f temporary ]
-then
-mkdir temporary/WEB-INF
-mkdir temporary/WEB-INF/classes
-mkdir temporary/WEB-INF/lib
-else
-mkdir temporary
-mkdir temporary/WEB-INF
-mkdir temporary/WEB-INF/classes
-mkdir temporary/WEB-INF/lib
-fi
-
 javac -parameters -cp $lib/framework.jar -d temporary/WEB-INF/classes @src.txt
 rm src.txt
+
+if [ -f Jsp/css ]
+then
+cp  Jsp/css ./temporary
+fi
 
 cp Jsp/*.jsp ./temporary
 
