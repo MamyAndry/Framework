@@ -10,12 +10,15 @@ import java.sql.*;
 public class Emp {
     // @AnnotationColumn(isPrimaryKey=true)
     Integer id = 1;
-
+    
     @AnnotationColumn()
     String nom;
-
+    
     @AnnotationColumn()
     String prenom;
+
+    @AnnotationColumn()
+    Integer[] option;
 
 //SETTERS
     public void setNom(String n){
@@ -23,6 +26,9 @@ public class Emp {
     }
     public void setPrenom(String p){
         this.prenom = p;
+    }
+    public void setOption(Integer[] c){
+        this.option = c;
     }
     public void setId(Integer i){
         this.id = i;
@@ -34,6 +40,9 @@ public class Emp {
     }
     public String getPrenom(){
         return this.prenom;
+    }
+    public Integer[] getOption(){
+        return this.option;
     }
     public Integer getId(){
         return this.id;
@@ -65,19 +74,20 @@ public class Emp {
         m.setData(lst);
         m.addItem("nom",this.getNom());
         m.addItem("prenom",this.getPrenom());
-        Connection con = null;
-        try{
-            con = new DbConnection("mamisoa","prom15","test").connectToPostgres();
-            GenericDao.save(con,this);
-        }
-        catch(Exception e){
-            e.printStackTrace();
-        }
-        finally{
-            try{
-                con.close();
-            }catch(Exception ex){}
-        }
+        m.addItem("option", this.getOption());
+        // Connection con = null;
+        // try{
+        //     con = new DbConnection("mamisoa","prom15","test").connectToPostgres();
+        //     GenericDao.save(con,this);
+        // }
+        // catch(Exception e){
+        //     e.printStackTrace();
+        // }
+        // finally{
+        //     try{
+        //         con.close();
+        //     }catch(Exception ex){}
+        // }
         return m;
     }
 }

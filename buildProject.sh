@@ -1,6 +1,6 @@
 tomcatBin=$HOME/Documents/apache-tomcat-10.0.27/bin
 tomcatWebapps=$HOME/Documents/apache-tomcat-10.0.27/webapps
-frameworkTestPATH=$HOME/Documents/Framework/Framework_test/
+frameworkTestPATH=$HOME/ITU/Mr_Naina/Framework/Framework_test/
 lib=$HOME/Documents/LIBRARY
 
 cd $frameworkTestPATH
@@ -18,6 +18,8 @@ fi
 cp Jsp/*.jsp ./temporary
 
 cp web.xml temporary/WEB-INF
+
+mkdir temporary/WEB-INF/lib
 
 cp $lib/framework.jar temporary/WEB-INF/lib/framework.jar
 

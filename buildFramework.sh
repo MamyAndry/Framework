@@ -1,6 +1,6 @@
-frameworkCodePATH=$HOME/Documents/Framework/Framework/
-frameworkTestWebPATH=$HOME/Documents/Framework/Framework_test/web/
+frameworkCodePATH=$HOME/ITU/Mr_Naina/Framework/Framework/
 lib=$HOME/Documents/LIBRARY
+
 cd $frameworkCodePATH
 
 find -name '*.java' > src.txt
