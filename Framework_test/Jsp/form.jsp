@@ -7,11 +7,12 @@
         <title>Form</title>
     </head>
     <body>
+        <h3>One</h3>
         <div>
             <form method="get" action="save-emp.do">
-                <input type="text" name="nom" value="So">
-                <input type="text" name="prenom" value="Rona">
-                <input type="file" name="upload">
+                <p>Nom : <input type="text" name="nom" value="So"></p>
+                <p>Prenom : <input type="text" name="prenom" value="Rona"></p>
+                <p>upload : <input type="file" name="upload"></p>
                 <p>choix 1 : <input type="checkbox" name="option[]" value="1"></p>
                 <p>choix 2 : <input type="checkbox" name="option[]" value="2"></p>
                 <p>choix 3 : <input type="checkbox" name="option[]" value="3"></p>
