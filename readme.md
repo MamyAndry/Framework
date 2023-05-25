@@ -1,4 +1,4 @@
-1 - Mila asiana "extension do" daholo ny "AnnotationUrl"
+<strong>1</strong> - Mila asiana "extension do" daholo ny "AnnotationUrl"
     oh: emp-all.do
 2 - Rehefa manao "type d'attribut":
     a) Raha "int" dia "Integer"
