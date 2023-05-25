@@ -4,6 +4,7 @@ import java.lang.reflect.*;
 import annotation.*;
 import java.util.ArrayList;
 import java.lang.reflect.*;
+import java.util.Enumeration;
 
 public class Helper{
 
@@ -100,7 +101,8 @@ public class Helper{
         }
         return res;
     }
-        public static Method getPK(Object obj) throws Exception{
+    
+    public static Method getPK(Object obj) throws Exception{
         String res = "";
         for(int i = 0 ; i < obj.getClass().getDeclaredFields().length ; i++){
             if(obj.getClass().getDeclaredFields()[i].isAnnotationPresent(AnnotationColumn.class)){
@@ -111,5 +113,13 @@ public class Helper{
         }
         return obj.getClass().getMethod("get" + res);
 
+    }
+
+    public boolean checkIfRedundant(String mot,Enumeration<String> lst){
+        while(lst.hasMoreElements()){
+            String str = lst.nextElement();
+            if(str.equals(mot)) return true;
+        }
+        return false;
     }
 }

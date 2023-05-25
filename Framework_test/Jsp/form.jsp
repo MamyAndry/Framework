@@ -8,13 +8,17 @@
     </head>
     <body>
         <div>
-            <form method="post" action="save-emp.do">
+            <form method="get" action="save-emp.do">
                 <input type="text" name="nom" value="So">
                 <input type="text" name="prenom" value="Rona">
+                <input type="file" name="upload">
+                <p>choix 1 : <input type="checkbox" name="option[]" value="1"></p>
+                <p>choix 2 : <input type="checkbox" name="option[]" value="2"></p>
+                <p>choix 3 : <input type="checkbox" name="option[]" value="3"></p>
                 <input type="submit" value="Valider">
             </form>
         </div>
-
+        <h3>Another One</h3>
         <div>
             <form method="get" action="emp-one.do">
                 <input type="text" name="test" value="Soa">
