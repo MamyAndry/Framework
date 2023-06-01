@@ -1,14 +1,17 @@
 package etu2060.framework.servlet;
 
 import annotation.AnnotationUrl;
+import etu2060.framework.FileUpload;
 import etu2060.framework.Mapping;
 import java.lang.reflect.*;
 import etu2060.framework.ModelView;
 import helper.Helper;
+import jakarta.servlet.http.Part;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.annotation.*;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.io.File;
@@ -23,6 +26,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.sql.Date;
 import java.util.function.*;
+
+@MultipartConfig(
+  fileSizeThreshold = 1024 * 1024 * 1, // 1 MB
+  maxFileSize = 1024 * 1024 * 10,      // 10 MB
+  maxRequestSize = 1024 * 1024 * 100   // 100 MB
+)
 
 public class FrontServlet extends HttpServlet {
     HashMap<String,Mapping> MappingUrls;
@@ -113,6 +122,23 @@ public class FrontServlet extends HttpServlet {
             String attribut = query.nextElement();
             res.add(attribut);
         }
+        try{
+            Part filePart = request.getPart("upload"); 
+            String contentDisposition = filePart.getHeader("content-disposition");
+            String fileName = "";
+            String[] tokens = contentDisposition.split(";");
+            for (String token : tokens) {
+                if (token.trim().startsWith("filename")) {
+                    return token.substring(token.indexOf("=") + 2, token.length() - 1);
+                }
+            }  
+            for (Part part : request.getParts()) {
+                part.write("/home/mamisoa/ITU/Mr_Naina/Framework/uploads/" + fileName);
+            }
+            System.out.println("The file uploaded sucessfully.");
+        }catch(Exception e){
+
+        }
         return res;
     } 
     
@@ -122,10 +148,9 @@ public class FrontServlet extends HttpServlet {
         Parameter[] param = method.getParameters();
         ArrayList<String> list = getListOfParameterNames(request);
         for(String attribut : list){
-            if(attribut.contains("[]")){
-                String[] value = request.getParameterValues(attribut);
-                for(int i = 0 ; i < param.length ; i++){
-                    if(param[i].getName().equals(attribut.subSequence(0, attribut.toCharArray().length - 2))){
+            for(int i = 0 ; i < param.length ; i++){
+                if(attribut.contains("[]") && param[i].getName().equals(attribut.subSequence(0, attribut.toCharArray().length - 2))){
+                        String[] value = request.getParameterValues(attribut);
                         Class<?> fieldType = param[i].getClass().getDeclaredFields()[i].getType();
                         Class<?> componentClass = fieldType.getComponentType();
                         Object temp = Array.newInstance(componentClass , value.length);
@@ -134,12 +159,8 @@ public class FrontServlet extends HttpServlet {
                         }
                         lst.add(temp);
                         break;
-                    }
-                }
-            }
-            else{
-                String value = request.getParameter(attribut);
-                for(int i = 0 ; i < param.length ; i++){
+                }else{
+                        String value = request.getParameter(attribut);
                     if(param[i].getName().equals(attribut)){
                         Class<?> fieldType = param[i].getType();
                         Object temp = fieldType.getDeclaredConstructor(String.class).newInstance(value);
@@ -153,27 +174,21 @@ public class FrontServlet extends HttpServlet {
     public static Object setDynamic(HttpServletRequest request , String className , Object obj) throws Exception{
         obj = Class.forName(className).getConstructor().newInstance();
         ArrayList<String> lst = getListOfParameterNames(request);
+        System.out.println(lst.size());
         for(String attribut : lst){
-            if(attribut.contains("[]")){
-                String[] value = request.getParameterValues(attribut);
-                String attribute = attribut.subSequence(0, attribut.toCharArray().length - 2).toString();
-                for(int i = 0 ; i < obj.getClass().getDeclaredFields().length ; i++){
-                    if(obj.getClass().getDeclaredFields()[i].getName().equals(attribute)){
-                        Class<?> fieldType = obj.getClass().getDeclaredFields()[i].getType();
-                        Class<?> componentClass = fieldType.getComponentType();
-                        Object temp = Array.newInstance(componentClass , value.length);
-                        for(int j = 0 ; j < value.length ; j++){
-                            Array.set( temp , j , componentClass.getDeclaredConstructor(String.class).newInstance(value[j]));
-                        }   
-                        System.out.println("Array = " + temp );
-                        obj.getClass().getDeclaredMethod("set" + Helper.turnIntoCapitalLetter(attribute) , fieldType ).invoke( obj , temp );
-                        break;
-                    }
-                }
-            }
-            else{
-                String value = request.getParameter(attribut);
-                for(int i = 0 ; i < obj.getClass().getDeclaredFields().length ; i++){
+            for(int i = 0 ; i < obj.getClass().getDeclaredFields().length ; i++){
+                if(attribut.contains("[]") && obj.getClass().getDeclaredFields()[i].getName().equals(attribut.subSequence(0, attribut.toCharArray().length - 2))){
+                    String[] value = request.getParameterValues(attribut);
+                    Class<?> fieldType = obj.getClass().getDeclaredFields()[i].getType();
+                    Class<?> componentClass = fieldType.getComponentType();
+                    Object temp = Array.newInstance(componentClass , value.length);
+                    for(int j = 0 ; j < value.length ; j++){
+                        Array.set( temp , j , componentClass.getDeclaredConstructor(String.class).newInstance(value[j]));
+                    }   
+                    // System.out.println("Array = " + temp );
+                    obj.getClass().getDeclaredMethod("set" + Helper.turnIntoCapitalLetter(attribut.subSequence(0, attribut.toCharArray().length - 2).toString()) , fieldType ).invoke( obj , temp );
+                }else{
+                    String value = request.getParameter(attribut);
                     if(obj.getClass().getDeclaredFields()[i].getName().equals(attribut)){
                         Class<?> fieldType = obj.getClass().getDeclaredFields()[i].getType();
                         Object temp = fieldType.getDeclaredConstructor(String.class).newInstance(value);

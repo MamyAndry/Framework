@@ -9,7 +9,7 @@
     <body>
         <h3>One</h3>
         <div>
-            <form method="get" action="save-emp.do">
+            <form method="post" action="save-emp.do" enctype="multipart/form-data">
                 <p>Nom : <input type="text" name="nom" value="So"></p>
                 <p>Prenom : <input type="text" name="prenom" value="Rona"></p>
                 <p>upload : <input type="file" name="upload"></p>
