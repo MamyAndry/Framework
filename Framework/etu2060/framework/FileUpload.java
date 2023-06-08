@@ -3,7 +3,7 @@ package etu2060.framework;
 public class FileUpload {
     String name;
     String path;
-    Byte[] bytes;
+    byte[] bytes;
 
     //SETTERS
     public void setName(String n){
@@ -12,7 +12,7 @@ public class FileUpload {
     public void setPath(String p){
         this.path = p;      
     }
-    public void setBytes(Byte[] b){
+    public void setBytes(byte[] b){
         this.bytes = b;
     }
     //GETTERS
@@ -22,14 +22,14 @@ public class FileUpload {
     public String getPath(){
         return this.path;      
     }
-    public Byte[] getBytes(){
+    public byte[] getBytes(){
         return this.bytes;
     }
     //CONSTRUCTOR
-    public FileUpload(String name , Byte[] bytes){
+    public FileUpload(String name , byte[] bytes){
         this.setName(name);
         this.setBytes(bytes);
     }
-
+    public FileUpload(){}
     //METHODS
 }

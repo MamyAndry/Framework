@@ -1,12 +1,14 @@
 package sorona;
 
 import annotation.*;
+import etu2060.framework.FileUpload;
 import etu2060.framework.ModelView;
 import java.util.HashMap;
 import dao.*;
 import java.sql.*;
 
 @AnnotationTable()
+@Scope(isSingleton = "singleton")
 public class Emp {
     // @AnnotationColumn(isPrimaryKey=true)
     Integer id = 1;
@@ -20,6 +22,7 @@ public class Emp {
     @AnnotationColumn()
     Integer[] option;
 
+    FileUpload empUpload;
 //SETTERS
     public void setNom(String n){
         this.nom = n;
@@ -32,6 +35,9 @@ public class Emp {
     }
     public void setId(Integer i){
         this.id = i;
+    }
+    public void setEmpUpload(FileUpload empUpload) {
+        this.empUpload = empUpload;
     }
 
 //GETTERS
@@ -46,6 +52,9 @@ public class Emp {
     }
     public Integer getId(){
         return this.id;
+    }
+    public FileUpload getEmpUpload() {
+        return empUpload;
     }
 
 //CONSTRUCTOR
@@ -75,6 +84,7 @@ public class Emp {
         m.addItem("nom",this.getNom());
         m.addItem("prenom",this.getPrenom());
         m.addItem("option", this.getOption());
+        m.addItem("empUpload", this.getEmpUpload());
         // Connection con = null;
         // try{
         //     con = new DbConnection("mamisoa","prom15","test").connectToPostgres();
