@@ -8,6 +8,10 @@
             <param-name>modelPackage</param-name>
             <param-value>sorona</param-value>
         </init-param>
+        <init-param>
+            <param-name>Session</param-name>
+            <param-value>admin</param-value>
+        </init-param>
     </servlet>
     <servlet-mapping>
         <servlet-name>FrontServlet</servlet-name>

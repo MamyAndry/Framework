@@ -7,7 +7,6 @@ import java.util.HashMap;
 import dao.*;
 import java.sql.*;
 
-@AnnotationTable()
 @Scope(isSingleton = "singleton")
 public class Emp {
     // @AnnotationColumn(isPrimaryKey=true)
@@ -62,13 +61,13 @@ public class Emp {
 
 //METHODS
 
-    @AnnotationUrl(url = "emp-all.do")
+    @Url(url = "emp-all.do")
     public ModelView findAll(){
         ModelView m = new ModelView("emp.jsp");
         return m;
         }
 
-    @AnnotationUrl(url = "emp-one.do")
+    @Url(url = "emp-one.do")
     public ModelView find(String test){
         ModelView m = new ModelView("emp2.jsp");
         m.addItem("id", test);
@@ -76,7 +75,7 @@ public class Emp {
     }
 
 
-    @AnnotationUrl(url = "save-emp.do")
+    @Url(url = "save-emp.do")
     public ModelView save(){
         ModelView m = new ModelView("emp.jsp");
         HashMap<String,Object> lst = new HashMap<String,Object>();
