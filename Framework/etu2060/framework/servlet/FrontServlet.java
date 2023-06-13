@@ -1,16 +1,23 @@
 package etu2060.framework.servlet;
 
-import annotation.AnnotationUrl;
+import annotation.Url;
+import annotation.Scope;
+import annotation.Authentification;
+import etu2060.framework.FileUpload;
 import etu2060.framework.Mapping;
 import java.lang.reflect.*;
 import etu2060.framework.ModelView;
 import helper.Helper;
+import jakarta.servlet.http.Part;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.annotation.*;
 import java.io.PrintWriter;
 import java.util.HashMap;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -19,22 +26,42 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.sql.Date;
-import java.util.function.*;
+import java.io.InputStream;
+
+@MultipartConfig(
+  fileSizeThreshold = 1024 * 1024 * 1, // 1 MB
+  maxFileSize = 1024 * 1024 * 10,      // 10 MB
+  maxRequestSize = 1024 * 1024 * 100   // 100 MB
+)
 
 public class FrontServlet extends HttpServlet {
-    HashMap<String,Mapping> MappingUrls;
+    HashMap< String , Mapping > MappingUrls;
+    HashMap< String , Object > singleton;
+    HashMap< String , Object > session;
 
 //SETTERS
     public void setMappingUrls(HashMap<String, Mapping> MappingUrls){
         this.MappingUrls = MappingUrls;
     }
+    public void setSingleton(HashMap< String , Object > singleton){
+        this.singleton = singleton;
+    }
+    public void setSession(HashMap<String, Object> session) {
+        this.session = session;
+    }
 
 //GETTERS
     public HashMap<String, Mapping> getMappingUrls() {
         return MappingUrls;
+    }
+    public HashMap< String , Object >  getSingleton() {
+        return singleton;
+    }
+    public HashMap<String, Object> getSession() {
+        return session;
     }
 //METHODS
     public ArrayList<String> findClasses(File directory, String packageName) throws ClassNotFoundException {
@@ -74,21 +101,36 @@ public class FrontServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException{
-        HashMap<String,Mapping> temp = new HashMap<String,Mapping>();
+        HashMap< String , Mapping > temp = new HashMap<String,Mapping>();
+        HashMap< String , Object > single = new HashMap< String , Object >();
+        HashMap< String , Object > sess = new HashMap< String , Object >();
         try{
             // System.out.println("modelPackage = " + getInitParameter("modelPackage"));
             ArrayList<String> list = getClasses(getInitParameter("modelPackage").trim());
+            String sessName = getInitParameter("Session").trim();
+
+            sess.put(sessName , null);
+
             for(String element : list){
-               Method[] methods = Class.forName(element).getDeclaredMethods();
+                Class<?> obj = Class.forName(element);
+                if( obj.isAnnotationPresent(Scope.class) ){
+                    Scope scope = obj.getAnnotation(Scope.class);
+                    if(scope.isSingleton().equals("singleton")){
+                        single.put(element , null);
+                    }
+                }
+               Method[] methods = obj.getDeclaredMethods();
                //        System.out.println(classes.size());
                for(Method m : methods){
-                   if(m.isAnnotationPresent(AnnotationUrl.class)){
-                       AnnotationUrl annotation = m.getAnnotation(AnnotationUrl.class);
+                   if(m.isAnnotationPresent(Url.class)){
+                       Url annotation = m.getAnnotation(Url.class);
                        temp.put(annotation.url(),new Mapping(element ,m.getName()));
                    }
                }
             }
+            this.setSingleton(single);
             this.setMappingUrls(temp);
+            this.setSession(sess);
 
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(FrontServlet.class.getName()).log(Level.SEVERE, null, ex);
@@ -104,8 +146,43 @@ public class FrontServlet extends HttpServlet {
             e.printStackTrace();
         }
     }
+
+    public FileUpload uploadTreatment(Collection<Part> lst , Field field){
+        FileUpload res = new FileUpload();
+        Part filePart = null; 
+        String fieldName = field.getName();
+        for(Part part : lst){
+            if(part.getName().equals(fieldName)){
+                filePart = part;
+                break;
+            }
+        }
+        try(InputStream input = filePart.getInputStream()){
+            ByteArrayOutputStream buffers = new ByteArrayOutputStream();
+            byte[] buffer = new byte[(int)filePart.getSize()];
+            int read = 0;
+            while( (read = input.read( buffer , 0 , buffer.length)) != -1){
+                buffers.write(buffer, 0, read);
+            }
+            res.setName(getFileName(filePart));
+            res.setBytes(buffers.toByteArray());
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return res;
+    }
+
+    private String getFileName(Part part) {
+        String contentDisposition = part.getHeader("content-disposition");
+        String[] parts = contentDisposition.split(";");
+        for (String partStr : parts) {
+            if (partStr.trim().startsWith("filename"))
+                return partStr.substring(partStr.indexOf('=') + 1).trim().replace("\"", "");
+        }
+        return null;
+    }
     
-    public static ArrayList<String> getListOfParameterNames(HttpServletRequest request){
+    public ArrayList<String> getListOfParameterNames(HttpServletRequest request){
         ArrayList<String> res = new ArrayList<String>();
         Enumeration<String> query = request.getParameterNames();
         int i = 0;
@@ -116,16 +193,15 @@ public class FrontServlet extends HttpServlet {
         return res;
     } 
     
-    public static ArrayList<Object> getFunctionArgument(HttpServletRequest request , Method method) throws Exception{
+    public ArrayList<Object> getFunctionArgument(HttpServletRequest request , Method method) throws Exception{
         ArrayList<Object> lst = new ArrayList<Object>();
         Enumeration<String> query = request.getParameterNames();
         Parameter[] param = method.getParameters();
         ArrayList<String> list = getListOfParameterNames(request);
         for(String attribut : list){
-            if(attribut.contains("[]")){
-                String[] value = request.getParameterValues(attribut);
-                for(int i = 0 ; i < param.length ; i++){
-                    if(param[i].getName().equals(attribut.subSequence(0, attribut.toCharArray().length - 2))){
+            for(int i = 0 ; i < param.length ; i++){
+                if(attribut.contains("[]") && param[i].getName().equals(attribut.subSequence(0, attribut.toCharArray().length - 2))){
+                        String[] value = request.getParameterValues(attribut);
                         Class<?> fieldType = param[i].getClass().getDeclaredFields()[i].getType();
                         Class<?> componentClass = fieldType.getComponentType();
                         Object temp = Array.newInstance(componentClass , value.length);
@@ -134,12 +210,8 @@ public class FrontServlet extends HttpServlet {
                         }
                         lst.add(temp);
                         break;
-                    }
-                }
-            }
-            else{
-                String value = request.getParameter(attribut);
-                for(int i = 0 ; i < param.length ; i++){
+                }else{
+                        String value = request.getParameter(attribut);
                     if(param[i].getName().equals(attribut)){
                         Class<?> fieldType = param[i].getType();
                         Object temp = fieldType.getDeclaredConstructor(String.class).newInstance(value);
@@ -150,35 +222,41 @@ public class FrontServlet extends HttpServlet {
         }
         return lst;
     }
-    public static Object setDynamic(HttpServletRequest request , String className , Object obj) throws Exception{
-        obj = Class.forName(className).getConstructor().newInstance();
+
+    public void setDefault(Object obj){
+        for( Field field : obj.getClass().getDeclaredFields() ){
+            // obj.getClass().getDeclaredMethod("set" + Helper.turnIntoCapitalLetter(field.getName()) , field.getType().getClass() ).invoke(obj , null);
+            System.out.println(field.getName() + " " +field.getType());
+        }
+    }
+
+    public Object setDynamic(HttpServletRequest request , String className , Object obj) throws Exception{
         ArrayList<String> lst = getListOfParameterNames(request);
+
+        // System.out.println(lst.size());
         for(String attribut : lst){
-            if(attribut.contains("[]")){
-                String[] value = request.getParameterValues(attribut);
-                String attribute = attribut.subSequence(0, attribut.toCharArray().length - 2).toString();
-                for(int i = 0 ; i < obj.getClass().getDeclaredFields().length ; i++){
-                    if(obj.getClass().getDeclaredFields()[i].getName().equals(attribute)){
-                        Class<?> fieldType = obj.getClass().getDeclaredFields()[i].getType();
-                        Class<?> componentClass = fieldType.getComponentType();
-                        Object temp = Array.newInstance(componentClass , value.length);
-                        for(int j = 0 ; j < value.length ; j++){
-                            Array.set( temp , j , componentClass.getDeclaredConstructor(String.class).newInstance(value[j]));
-                        }   
-                        System.out.println("Array = " + temp );
-                        obj.getClass().getDeclaredMethod("set" + Helper.turnIntoCapitalLetter(attribute) , fieldType ).invoke( obj , temp );
-                        break;
-                    }
-                }
-            }
-            else{
-                String value = request.getParameter(attribut);
-                for(int i = 0 ; i < obj.getClass().getDeclaredFields().length ; i++){
-                    if(obj.getClass().getDeclaredFields()[i].getName().equals(attribut)){
-                        Class<?> fieldType = obj.getClass().getDeclaredFields()[i].getType();
-                        Object temp = fieldType.getDeclaredConstructor(String.class).newInstance(value);
-                        obj.getClass().getDeclaredMethod("set" + Helper.turnIntoCapitalLetter(attribut) , fieldType ).invoke( obj , temp );
-                        break;
+            for(int i = 0 ; i < obj.getClass().getDeclaredFields().length ; i++){
+                if(attribut.contains("[]") && obj.getClass().getDeclaredFields()[i].getName().equals(attribut.subSequence(0, attribut.toCharArray().length - 2))){
+                    String[] value = request.getParameterValues(attribut);
+                    Class<?> fieldType = obj.getClass().getDeclaredFields()[i].getType();
+                    Class<?> componentClass = fieldType.getComponentType();
+                    Object temp = Array.newInstance(componentClass , value.length);
+                    for(int j = 0 ; j < value.length ; j++){
+                        Array.set( temp , j , componentClass.getDeclaredConstructor(String.class).newInstance(value[j]));
+                    }   
+                    obj.getClass().getDeclaredMethod("set" + Helper.turnIntoCapitalLetter(attribut.subSequence(0, attribut.toCharArray().length - 2).toString()) , fieldType ).invoke( obj , temp );
+                }else{
+                    if(obj.getClass().getDeclaredFields()[i].getType().getName().equals("etu2060.framework.FileUpload")){
+                            FileUpload fu = uploadTreatment(request.getParts(), obj.getClass().getDeclaredFields()[i]);
+                            obj.getClass().getDeclaredMethod("set" + Helper.turnIntoCapitalLetter(obj.getClass().getDeclaredFields()[i].getName()) , obj.getClass().getDeclaredFields()[i].getType() ).invoke( obj , fu );
+                    }else{
+                        String value = request.getParameter(attribut);
+                        if(obj.getClass().getDeclaredFields()[i].getName().equals(attribut)){
+                            Class<?> fieldType = obj.getClass().getDeclaredFields()[i].getType();
+                            Object temp = fieldType.getDeclaredConstructor(String.class).newInstance(value);
+                            obj.getClass().getDeclaredMethod("set" + Helper.turnIntoCapitalLetter(attribut) , fieldType ).invoke( obj , temp );
+                            break;
+                        }
                     }
                 }
             }
@@ -205,14 +283,32 @@ public class FrontServlet extends HttpServlet {
         try{
             String[] values = request.getRequestURI().split("/");
             // out.print(query);
+            Object obj = null;
             String key = values[values.length-1];
             out.print("<p>");
             out.println(this.getMappingUrls());
             out.print("</p>");
+            out.print("<p>");
+            out.println(this.getSingleton());
+            out.print("</p>");
+
             if(this.getMappingUrls().containsKey(key)){
                 Mapping map = this.getMappingUrls().get(key);
                 String method = map.getMethods();
-                Object obj = Class.forName(map.getClassName()).getConstructor().newInstance();
+                String keySingleton = map.getClassName();
+                if(this.getSingleton().containsKey(keySingleton)){
+                    Object instance = this.getSingleton().get(keySingleton);
+                    if(instance == null){
+                        this.getSingleton().replace(keySingleton , Class.forName(keySingleton).getConstructor().newInstance());
+                        instance = this.getSingleton().get(keySingleton);
+                        setDefault(instance);
+                        obj = instance;
+                    }else{
+                        obj = Class.forName(keySingleton).getConstructor().newInstance();
+                        setDefault(obj);
+                    }
+                }
+                else obj = Class.forName(keySingleton).getConstructor().newInstance();
                 Method[] listMethod = obj.getClass().getDeclaredMethods();
                 Method m = null;
                 int i = 0;
@@ -220,19 +316,49 @@ public class FrontServlet extends HttpServlet {
                     i++;
                 }
                 m = listMethod[i];
-                ArrayList<Object> args = new ArrayList<Object>();
-                // Verify if there are data sent
-                if(request.getParameterNames().nextElement() != null){
-                    obj = setDynamic(request , map.getClassName() , obj);
-                    args = getFunctionArgument( request , m);
+                ModelView view = null;
+                if( m .isAnnotationPresent(Authentification.class)){
+                    Authentification authentification = m.getAnnotation(Authentification.class);
+                    String sess = authentification.auth();
 
-                }
-                ModelView view = (ModelView) m.invoke( obj , (Object[]) args.toArray());if(view.getData() != null){
-                    for(String dataKey : view.getData().keySet()){
-                        request.setAttribute(dataKey , view.getData().get(dataKey));
-                        out.print("<p>");
-                        out.print(dataKey);
-                        out.print("</p>");
+                    ArrayList<Object> args = new ArrayList<Object>();
+    
+                    // Verify if there are data sent
+                    if(request.getParameterNames().nextElement() != null){
+                        obj = setDynamic(request , map.getClassName() , obj);
+                        args = getFunctionArgument( request , m);
+                    }
+                    view = (ModelView) m.invoke( obj , (Object[]) args.toArray());
+                    if(view.getData() != null){
+                        for(String dataKey : view.getData().keySet()){
+                            request.setAttribute(dataKey , view.getData().get(dataKey));
+                            out.print("<p>");
+                            out.print(dataKey);
+                            out.print("</p>");
+                        }
+                    if(view.getSession() != null){
+                        for(String dataKey : view.getSession().keySet()){
+                            HttpSession session = request.getSession();
+                            session.setAttribute(dataKey, view.getSession().get(dataKey));
+                        }
+                    }
+                    }
+                }else{
+                    ArrayList<Object> args = new ArrayList<Object>();
+    
+                    // Verify if there are data sent
+                    if(request.getParameterNames().nextElement() != null){
+                        obj = setDynamic(request , map.getClassName() , obj);
+                        args = getFunctionArgument( request , m);
+                    }
+                    view = (ModelView) m.invoke( obj , (Object[]) args.toArray());
+                    if(view.getData() != null){
+                        for(String dataKey : view.getData().keySet()){
+                            request.setAttribute(dataKey , view.getData().get(dataKey));
+                            out.print("<p>");
+                            out.print(dataKey);
+                            out.print("</p>");
+                        }
                     }
                 }
                 request.getRequestDispatcher(view.getUrl()).forward(request,response);
@@ -261,7 +387,4 @@ public class FrontServlet extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
-
-
-
 }

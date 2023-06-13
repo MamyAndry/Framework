@@ -1,3 +1,4 @@
+<%@page import="etu2060.framework.FileUpload"%>
 <!DOCTYPE html>
 <html>
     <head>
@@ -17,6 +18,9 @@
                 out.print("cucu ito e "+lst[i]);
                 out.print("<br>");
             }
+            FileUpload fu = (FileUpload)request.getAttribute("empUpload");
+            out.print(fu.getName());
+            out.print("<br>");
         %>
     </body>
 </html>

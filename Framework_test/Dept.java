@@ -1,13 +1,13 @@
 package sorona;
 
-import annotation.AnnotationUrl;
+import annotation.Url;
 import etu2060.framework.ModelView;
 import java.util.HashMap;
 
 public class Dept {
     Integer id = 2;
 
-    @AnnotationUrl(url = "dept-all.do")
+    @Url(url = "dept-all.do")
     public ModelView findAll(){
         ModelView m = new ModelView("dept.jsp");
         HashMap<String,Object> lst = new HashMap<String,Object>();
