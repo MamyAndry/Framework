@@ -6,5 +6,5 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 
 public @interface Authentification{
-    String auth() default "admin";
+    String auth() default "";
 }

@@ -74,7 +74,23 @@ public class Emp {
         return m;
     }
 
+    @Url(url = "login.do")
+    public ModelView login(String profile,String pwd){
+        if(profile.equals("admin") && pwd.equals("admin")){
+            ModelView m = new ModelView("form.jsp");
+            m.addSessionItem("profile", "admin");
+            return m;
+        }else if(profile.equals("user") && pwd.equals("user")){
+            ModelView m = new ModelView("form.jsp");
+            m.addSessionItem("profile", "user");
+            return m;
+        }
+        else{
+            return new ModelView("index.jsp");
+        }
+    }
 
+    @Authentification(auth = "user")
     @Url(url = "save-emp.do")
     public ModelView save(){
         ModelView m = new ModelView("emp.jsp");
