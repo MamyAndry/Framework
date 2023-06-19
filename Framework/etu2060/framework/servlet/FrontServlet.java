@@ -40,7 +40,8 @@ import java.io.InputStream;
 public class FrontServlet extends HttpServlet {
     HashMap< String , Mapping > MappingUrls;
     HashMap< String , Object > singleton;
-    HashMap< String , Object > session;
+    String sessionName;
+    String sessionProfile;
 
 //SETTERS
     public void setMappingUrls(HashMap<String, Mapping> MappingUrls){
@@ -49,8 +50,11 @@ public class FrontServlet extends HttpServlet {
     public void setSingleton(HashMap< String , Object > singleton){
         this.singleton = singleton;
     }
-    public void setSession(HashMap<String, Object> session) {
-        this.session = session;
+    public void setSessionName(String sessionName) {
+        this.sessionName = sessionName;
+    }
+    public void setSessionProfile(String sessionProfile) {
+        this.sessionProfile = sessionProfile;
     }
 
 //GETTERS
@@ -60,8 +64,11 @@ public class FrontServlet extends HttpServlet {
     public HashMap< String , Object >  getSingleton() {
         return singleton;
     }
-    public HashMap<String, Object> getSession() {
-        return session;
+    public String getSessionName() {
+        return sessionName;
+    }
+    public String getSessionProfile() {
+        return sessionProfile;
     }
 //METHODS
     public ArrayList<String> findClasses(File directory, String packageName) throws ClassNotFoundException {
@@ -103,13 +110,14 @@ public class FrontServlet extends HttpServlet {
     public void init() throws ServletException{
         HashMap< String , Mapping > temp = new HashMap<String,Mapping>();
         HashMap< String , Object > single = new HashMap< String , Object >();
-        HashMap< String , Object > sess = new HashMap< String , Object >();
         try{
             // System.out.println("modelPackage = " + getInitParameter("modelPackage"));
             ArrayList<String> list = getClasses(getInitParameter("modelPackage").trim());
-            String sessName = getInitParameter("Session").trim();
+            String sessName = getInitParameter("Session_name").trim();
+            String sessProf = getInitParameter("Session_profile").trim();
 
-            sess.put(sessName , null);
+            this.setSessionName(sessName);
+            this.setSessionProfile(sessProf);
 
             for(String element : list){
                 Class<?> obj = Class.forName(element);
@@ -130,7 +138,6 @@ public class FrontServlet extends HttpServlet {
             }
             this.setSingleton(single);
             this.setMappingUrls(temp);
-            this.setSession(sess);
 
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(FrontServlet.class.getName()).log(Level.SEVERE, null, ex);
@@ -282,7 +289,6 @@ public class FrontServlet extends HttpServlet {
         out.println("<h3>Servlet FrontServlet at " + request.getContextPath() + "</h3>");
         try{
             String[] values = request.getRequestURI().split("/");
-            // out.print(query);
             Object obj = null;
             String key = values[values.length-1];
             out.print("<p>");
@@ -317,48 +323,36 @@ public class FrontServlet extends HttpServlet {
                 }
                 m = listMethod[i];
                 ModelView view = null;
-                if( m .isAnnotationPresent(Authentification.class)){
-                    Authentification authentification = m.getAnnotation(Authentification.class);
-                    String sess = authentification.auth();
 
-                    ArrayList<Object> args = new ArrayList<Object>();
-    
-                    // Verify if there are data sent
-                    if(request.getParameterNames().nextElement() != null){
-                        obj = setDynamic(request , map.getClassName() , obj);
-                        args = getFunctionArgument( request , m);
+                String session_value = (String) request.getSession().getAttribute(this.getSessionProfile());
+
+                if(m.isAnnotationPresent(Authentification.class) && !m.getAnnotation(Authentification.class).auth().isEmpty() && !m.getAnnotation(Authentification.class).auth().equals(session_value)){
+                    throw new Exception("Please authentificate yourself<br>");
+                }
+
+                ArrayList<Object> args = new ArrayList<Object>();
+
+                // Verify if there are data sent
+                if(request.getParameterNames().nextElement() != null){
+                    obj = setDynamic(request , map.getClassName() , obj);
+                    args = getFunctionArgument( request , m);
+                }
+                
+                view = (ModelView) m.invoke( obj , (Object[]) args.toArray());
+
+                if(view.getData() != null){
+                    for(String dataKey : view.getData().keySet()){
+                        request.setAttribute(dataKey , view.getData().get(dataKey));
+                        out.print("<p>");
+                        out.print(dataKey);
+                        out.print("</p>");
                     }
-                    view = (ModelView) m.invoke( obj , (Object[]) args.toArray());
-                    if(view.getData() != null){
-                        for(String dataKey : view.getData().keySet()){
-                            request.setAttribute(dataKey , view.getData().get(dataKey));
-                            out.print("<p>");
-                            out.print(dataKey);
-                            out.print("</p>");
-                        }
-                    if(view.getSession() != null){
-                        for(String dataKey : view.getSession().keySet()){
-                            HttpSession session = request.getSession();
-                            session.setAttribute(dataKey, view.getSession().get(dataKey));
-                        }
-                    }
-                    }
-                }else{
-                    ArrayList<Object> args = new ArrayList<Object>();
-    
-                    // Verify if there are data sent
-                    if(request.getParameterNames().nextElement() != null){
-                        obj = setDynamic(request , map.getClassName() , obj);
-                        args = getFunctionArgument( request , m);
-                    }
-                    view = (ModelView) m.invoke( obj , (Object[]) args.toArray());
-                    if(view.getData() != null){
-                        for(String dataKey : view.getData().keySet()){
-                            request.setAttribute(dataKey , view.getData().get(dataKey));
-                            out.print("<p>");
-                            out.print(dataKey);
-                            out.print("</p>");
-                        }
+                }
+
+                if(view.getSession() != null){
+                    for(String dataKey : view.getSession().keySet()){
+                        HttpSession session = request.getSession();
+                        session.setAttribute(dataKey, view.getSession().get(dataKey));
                     }
                 }
                 request.getRequestDispatcher(view.getUrl()).forward(request,response);
