@@ -1,4 +1,7 @@
-
+<%
+    out.println(request.getSession().getAttribute("current"));
+    out.println("<br>");
+%>
 <!DOCTYPE html>
 <html>
     <head>

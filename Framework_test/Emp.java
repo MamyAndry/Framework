@@ -22,6 +22,7 @@ public class Emp {
     Integer[] option;
 
     FileUpload empUpload;
+    HashMap<String,Object> session;
 //SETTERS
     public void setNom(String n){
         this.nom = n;
@@ -37,6 +38,9 @@ public class Emp {
     }
     public void setEmpUpload(FileUpload empUpload) {
         this.empUpload = empUpload;
+    }
+    public void setSession(HashMap<String, Object> session) {
+        this.session = session;
     }
 
 //GETTERS
@@ -54,6 +58,9 @@ public class Emp {
     }
     public FileUpload getEmpUpload() {
         return empUpload;
+    }
+    public HashMap<String, Object> getSession() {
+        return session;
     }
 
 //CONSTRUCTOR
@@ -74,11 +81,13 @@ public class Emp {
         return m;
     }
 
+    @Session()
     @Url(url = "login.do")
     public ModelView login(String profile,String pwd){
         if(profile.equals("admin") && pwd.equals("admin")){
             ModelView m = new ModelView("form.jsp");
             m.addSessionItem("profile", "admin");
+            this.getSession().put("current", "profile");
             return m;
         }else if(profile.equals("user") && pwd.equals("user")){
             ModelView m = new ModelView("form.jsp");
@@ -90,7 +99,8 @@ public class Emp {
         }
     }
 
-    @Authentification(auth = "user")
+    @Session
+    @Authentification(auth = "admin")
     @Url(url = "save-emp.do")
     public ModelView save(){
         ModelView m = new ModelView("emp.jsp");
@@ -100,6 +110,7 @@ public class Emp {
         m.addItem("prenom",this.getPrenom());
         m.addItem("option", this.getOption());
         m.addItem("empUpload", this.getEmpUpload());
+        this.getSession().put("current", "gg");
         // Connection con = null;
         // try{
         //     con = new DbConnection("mamisoa","prom15","test").connectToPostgres();

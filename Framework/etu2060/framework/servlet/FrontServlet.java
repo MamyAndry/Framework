@@ -2,6 +2,7 @@ package etu2060.framework.servlet;
 
 import annotation.Url;
 import annotation.Scope;
+import annotation.Session;
 import annotation.Authentification;
 import etu2060.framework.FileUpload;
 import etu2060.framework.Mapping;
@@ -27,6 +28,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.io.InputStream;
@@ -42,6 +44,7 @@ public class FrontServlet extends HttpServlet {
     HashMap< String , Object > singleton;
     String sessionName;
     String sessionProfile;
+    String sessionFields;
 
 //SETTERS
     public void setMappingUrls(HashMap<String, Mapping> MappingUrls){
@@ -55,6 +58,9 @@ public class FrontServlet extends HttpServlet {
     }
     public void setSessionProfile(String sessionProfile) {
         this.sessionProfile = sessionProfile;
+    }
+    public void setSessionFields(String sessionFields) {
+        this.sessionFields = sessionFields;
     }
 
 //GETTERS
@@ -70,6 +76,10 @@ public class FrontServlet extends HttpServlet {
     public String getSessionProfile() {
         return sessionProfile;
     }
+    public String getSessionFields() {
+        return sessionFields;
+    }
+
 //METHODS
     public ArrayList<String> findClasses(File directory, String packageName) throws ClassNotFoundException {
         ArrayList<String> classes = new ArrayList<String>();
@@ -115,9 +125,11 @@ public class FrontServlet extends HttpServlet {
             ArrayList<String> list = getClasses(getInitParameter("modelPackage").trim());
             String sessName = getInitParameter("Session_name").trim();
             String sessProf = getInitParameter("Session_profile").trim();
+            String session = getInitParameter("Session_fields").trim();
 
             this.setSessionName(sessName);
             this.setSessionProfile(sessProf);
+            this.setSessionFields(session);
 
             for(String element : list){
                 Class<?> obj = Class.forName(element);
@@ -254,8 +266,10 @@ public class FrontServlet extends HttpServlet {
                     obj.getClass().getDeclaredMethod("set" + Helper.turnIntoCapitalLetter(attribut.subSequence(0, attribut.toCharArray().length - 2).toString()) , fieldType ).invoke( obj , temp );
                 }else{
                     if(obj.getClass().getDeclaredFields()[i].getType().getName().equals("etu2060.framework.FileUpload")){
+                        try{
                             FileUpload fu = uploadTreatment(request.getParts(), obj.getClass().getDeclaredFields()[i]);
                             obj.getClass().getDeclaredMethod("set" + Helper.turnIntoCapitalLetter(obj.getClass().getDeclaredFields()[i].getName()) , obj.getClass().getDeclaredFields()[i].getType() ).invoke( obj , fu );
+                        }catch(Exception e){} 
                     }else{
                         String value = request.getParameter(attribut);
                         if(obj.getClass().getDeclaredFields()[i].getName().equals(attribut)){
@@ -338,7 +352,26 @@ public class FrontServlet extends HttpServlet {
                     args = getFunctionArgument( request , m);
                 }
                 
+                if(m.isAnnotationPresent(Session.class)){
+                    HttpSession session = request.getSession();
+                    ArrayList<String> lstTemp = Collections.list(session.getAttributeNames());
+                    HashMap<String,Object> lst = new HashMap<String,Object>();  
+                    for(String str : lstTemp){
+                        lst.put(str, session.getAttribute(str));
+                    }
+                    Method meth = obj.getClass().getDeclaredMethod("set"+Helper.turnIntoCapitalLetter(this.getSessionFields()), HashMap.class);
+                    meth.invoke(obj , lst);
+                }
                 view = (ModelView) m.invoke( obj , (Object[]) args.toArray());
+                
+                if(m.isAnnotationPresent(Session.class)){
+                    HttpSession session = request.getSession();
+                    Method meth = obj.getClass().getDeclaredMethod("get"+Helper.turnIntoCapitalLetter(this.getSessionFields()));
+                    HashMap<String,Object> lst = (HashMap<String,Object>)meth.invoke(obj); 
+                    for(String str : lst.keySet()){
+                        session.setAttribute(str, lst.get(str));
+                    }
+                }
 
                 if(view.getData() != null){
                     for(String dataKey : view.getData().keySet()){

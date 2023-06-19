@@ -9,6 +9,8 @@
     <body>
         <h1>IT WORKS!!!</h1>
         <%
+            out.println(request.getSession().getAttribute("current"));
+            out.println("<br>");
             out.print(request.getAttribute("nom"));
             out.print("<br>");
             out.print(request.getAttribute("prenom"));
