@@ -18,7 +18,11 @@
             <param-name>Session_profile</param-name>
             <param-value>profile</param-value>
         </init-param>
-        
+
+        <init-param>
+            <param-name>Session_fields</param-name>
+            <param-value>session</param-value>
+        </init-param>
     </servlet>
     <servlet-mapping>
         <servlet-name>FrontServlet</servlet-name>
