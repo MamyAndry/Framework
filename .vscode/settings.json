@@ -1,6 +1,8 @@
 {
     "java.project.referencedLibraries": [
         "lib/**/*.jar",
-        "/home/mamisoa/Documents/LIBRARY/servlet-api.jar"
+        "/home/mamisoa/Documents/LIBRARY/servlet-api.jar",
+        "/home/mamisoa/Documents/LIBRARY/gson-2.10.1.jar",
+        "/home/mamisoa/Documents/LIBRARY/gson-2-10-1.jar"
     ]
 }

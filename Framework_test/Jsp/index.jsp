@@ -13,6 +13,6 @@
         <label>Password</label>
             <input type="password" name="pwd" value="admin"><br>
             <input type="submit" value="OK">
-       </form>
-</body>
-</html>
+    </form>
+    </br>
+    <a href="testJson.do"><button>Test Json</button></a>

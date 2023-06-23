@@ -5,7 +5,7 @@ cd $frameworkCodePATH
 
 find -name '*.java' > src.txt
 mkdir temp
-javac -cp $lib/servlet-api.jar -d temp @src.txt
+javac -cp $lib/servlet-api.jar:$lib/gson-2-10-1.jar -d temp @src.txt
 rm src.txt
 cd temp
 jar -cf ../framework.jar .

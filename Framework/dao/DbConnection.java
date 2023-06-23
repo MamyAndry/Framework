@@ -1,7 +1,6 @@
 package dao;
 
 import java.sql.*;
-import helper.XmlParser;
 
 public class DbConnection{
     String username;
@@ -20,15 +19,9 @@ public class DbConnection{
 
     //CONSTRUCTOR
     public DbConnection(){
-        String[] values = XmlParser.getValues();
-        this.setUsername(values[1]);
-        this.setPassword(values[2]);
-        this.setDatabase(values[0]);
-    }
-    public DbConnection(String username , String password , String database){
-        this.setUsername(username);
-        this.setPassword(password);
-        this.setDatabase(database);
+        this.setUsername("mamisoa");
+        this.setPassword("prom15");
+        this.setDatabase("port");
     }
     //METHODS
     public Connection connectToOracle(){
@@ -41,14 +34,14 @@ public class DbConnection{
         return con;
     }
 
-    public Connection connectToPostgres(){
+    public Connection connectToPostgres() throws Exception{
         Connection con=null;
         try
         {
           Class.forName("org.postgresql.Driver");
            con = DriverManager.getConnection("jdbc:postgresql://localhost:5432/"+this.getDatabase(),this.getUsername(),this.getPassword());
         }
-        catch(Exception e){e.printStackTrace();}
+        catch(Exception e) {throw e;}
         return con;
     }
 }

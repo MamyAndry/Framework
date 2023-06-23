@@ -7,6 +7,7 @@ public class ModelView {
     String url;
     HashMap<String,Object> data = new HashMap<String,Object>();
     HashMap<String,Object> session = new HashMap<String,Object>();
+    boolean isJson;
 
 //GETTERS
     public String getUrl() {
@@ -17,6 +18,9 @@ public class ModelView {
     }
     public HashMap<String, Object> getSession(){
         return this.data;
+    }
+    public boolean getIsJson(){
+        return this.isJson;
     }
 
 //SETTERS
@@ -29,10 +33,16 @@ public class ModelView {
     public void setSession(HashMap<String, Object> session) {
         this.session = session;
     }
+    public void setJson(boolean isJson) {
+        this.isJson = isJson;
+    }
 
 //CONSTRUCTOR
     public ModelView(String v) {
         this.setUrl(v);
+    }
+    public ModelView(boolean bl) {
+        this.setJson(bl);
     }
     public ModelView(){}
 
