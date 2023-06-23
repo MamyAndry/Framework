@@ -111,19 +111,16 @@ public class Emp {
         m.addItem("option", this.getOption());
         m.addItem("empUpload", this.getEmpUpload());
         this.getSession().put("current", "gg");
-        // Connection con = null;
-        // try{
-        //     con = new DbConnection("mamisoa","prom15","test").connectToPostgres();
-        //     GenericDao.save(con,this);
-        // }
-        // catch(Exception e){
-        //     e.printStackTrace();
-        // }
-        // finally{
-        //     try{
-        //         con.close();
-        //     }catch(Exception ex){}
-        // }
+        return m;
+    }
+    
+    @Url(url = "testJson.do")
+    public ModelView test(){
+        ModelView m = new ModelView(true);
+        HashMap<String,Object> lst = new HashMap<String,Object>();
+        m.setData(lst);
+        m.addItem("nom","RATSIMBAZAFY");
+        m.addItem("prenom","Mamisoa");
         return m;
     }
 }
