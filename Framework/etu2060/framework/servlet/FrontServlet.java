@@ -3,6 +3,7 @@ package etu2060.framework.servlet;
 import annotation.Url;
 import annotation.Scope;
 import annotation.Session;
+import annotation.Json;
 import annotation.Authentification;
 import etu2060.framework.FileUpload;
 import etu2060.framework.Mapping;
@@ -32,6 +33,10 @@ import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.io.InputStream;
+<<<<<<< Updated upstream
+=======
+import com.google.gson.Gson;
+>>>>>>> Stashed changes
 
 @MultipartConfig(
   fileSizeThreshold = 1024 * 1024 * 1, // 1 MB
@@ -284,16 +289,12 @@ public class FrontServlet extends HttpServlet {
         }
         return obj;
     }
-    /**
-     * @param request
-     * @param response
-     * @throws ServletException
-     * @throws IOException
-     */
+    
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
+<<<<<<< Updated upstream
         out.println("<!DOCTYPE html>");
         out.println("<html>");
         out.println("<head>");
@@ -301,16 +302,21 @@ public class FrontServlet extends HttpServlet {
         out.println("</head>");
         out.println("<body>");
         out.println("<h3>Servlet FrontServlet at " + request.getContextPath() + "</h3>");
+=======
+>>>>>>> Stashed changes
         try{
             String[] values = request.getRequestURI().split("/");
             Object obj = null;
             String key = values[values.length-1];
+<<<<<<< Updated upstream
             out.print("<p>");
             out.println(this.getMappingUrls());
             out.print("</p>");
             out.print("<p>");
             out.println(this.getSingleton());
             out.print("</p>");
+=======
+>>>>>>> Stashed changes
 
             if(this.getMappingUrls().containsKey(key)){
                 Mapping map = this.getMappingUrls().get(key);
@@ -352,6 +358,7 @@ public class FrontServlet extends HttpServlet {
                     args = getFunctionArgument( request , m);
                 }
                 
+<<<<<<< Updated upstream
                 if(m.isAnnotationPresent(Session.class)){
                     HttpSession session = request.getSession();
                     ArrayList<String> lstTemp = Collections.list(session.getAttributeNames());
@@ -370,9 +377,37 @@ public class FrontServlet extends HttpServlet {
                     HashMap<String,Object> lst = (HashMap<String,Object>)meth.invoke(obj); 
                     for(String str : lst.keySet()){
                         session.setAttribute(str, lst.get(str));
-                    }
-                }
+=======
+                
+                if(m.isAnnotationPresent(Json.class)){
+                    out.print( new Gson().toJson(m.invoke(obj , args.toArray())));
+                }else{
 
+                    //Ajout de session
+                    if(m.isAnnotationPresent(Session.class)){
+                        HttpSession session = request.getSession();
+                        ArrayList<String> lstTemp = Collections.list(session.getAttributeNames());
+                        HashMap<String,Object> lst = new HashMap<String,Object>();  
+                        for(String str : lstTemp){
+                            lst.put(str, session.getAttribute(str));
+                        }
+                        Method meth = obj.getClass().getDeclaredMethod("set"+Helper.turnIntoCapitalLetter(this.getSessionFields()), HashMap.class);
+                        meth.invoke(obj , lst);
+                    }
+                    ModelView view = (ModelView) m.invoke( obj , args.toArray());
+                
+                    //Gestion de session
+                    if(m.isAnnotationPresent(Session.class)){
+                        HttpSession session = request.getSession();
+                        Method meth = obj.getClass().getDeclaredMethod("get"+Helper.turnIntoCapitalLetter(this.getSessionFields()));
+                        HashMap<String,Object> lst = (HashMap<String,Object>)meth.invoke(obj); 
+                        for(String str : lst.keySet()){
+                            session.setAttribute(str, lst.get(str));
+                        }
+>>>>>>> Stashed changes
+                    }
+
+<<<<<<< Updated upstream
                 if(view.getData() != null){
                     for(String dataKey : view.getData().keySet()){
                         request.setAttribute(dataKey , view.getData().get(dataKey));
@@ -386,6 +421,25 @@ public class FrontServlet extends HttpServlet {
                     for(String dataKey : view.getSession().keySet()){
                         HttpSession session = request.getSession();
                         session.setAttribute(dataKey, view.getSession().get(dataKey));
+=======
+                    //Return Json
+                    if(view.getIsJson()){
+                        out.print( new Gson().toJson(view.getData()));
+                    }else{
+                        if(view.getData() != null){
+                            for(String dataKey : view.getData().keySet()){
+                                request.setAttribute(dataKey , view.getData().get(dataKey));
+                            }
+                        }
+        
+                        if(view.getSession() != null){
+                            for(String dataKey : view.getSession().keySet()){
+                                HttpSession session = request.getSession();
+                                session.setAttribute(dataKey, view.getSession().get(dataKey));
+                            }
+                        }
+                        request.getRequestDispatcher(view.getUrl()).forward(request,response);
+>>>>>>> Stashed changes
                     }
                 }
                 request.getRequestDispatcher(view.getUrl()).forward(request,response);
@@ -413,5 +467,5 @@ public class FrontServlet extends HttpServlet {
     @Override
     public String getServletInfo() {
         return "Short description";
-    }// </editor-fold>
+    }
 }
