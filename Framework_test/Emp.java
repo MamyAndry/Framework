@@ -64,7 +64,12 @@ public class Emp {
     }
 
 //CONSTRUCTOR
+    public Emp(){}
 
+    public Emp(String nom , String prenom){
+        this.setNom(nom);
+        this.setPrenom(prenom);
+    }
 
 //METHODS
 
@@ -125,5 +130,16 @@ public class Emp {
         //     }catch(Exception ex){}
         // }
         return m;
+    }
+
+    @Json
+    @Url(url = "testJsonAnnotation.do")
+    public Emp testJson(){
+        // ModelView m = new ModelView(true);
+        // HashMap<String,Object> lst = new HashMap<String,Object>();
+        // m.setData(lst);
+        // m.addItem("nom","RATSIMBAZAFY");
+        // m.addItem("prenom","Mamisoa");
+        return new Emp("RATSIMBAZAFY","Mamisoa");
     }
 }

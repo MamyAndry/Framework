@@ -13,6 +13,14 @@
         <label>Password</label>
             <input type="password" name="pwd" value="admin"><br>
             <input type="submit" value="OK">
+<<<<<<< Updated upstream
        </form>
 </body>
 </html>
+=======
+    </form>
+    </br>
+    <a href="testJson.do"><button>Test Json</button></a>
+
+    <a href="testJsonAnnotation.do"><button>Test Json Annotation</button></a>
+>>>>>>> Stashed changes
