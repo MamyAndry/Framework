@@ -22,6 +22,7 @@ cp web.xml temporary/WEB-INF
 mkdir temporary/WEB-INF/lib
 
 cp $lib/framework.jar temporary/WEB-INF/lib/framework.jar
+cp $lib/gson.jar temporary/WEB-INF/lib/gson.jar
 
 cd temporary 
 jar -cf Project.war .

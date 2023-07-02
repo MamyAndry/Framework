@@ -249,8 +249,7 @@ public class FrontServlet extends HttpServlet {
 
     public void setDefault(Object obj) throws Exception{
         for( Field field : obj.getClass().getDeclaredFields() ){
-            obj.getClass().getDeclaredMethod("set" + capitalize(field.getName()) , field.getType().getClass() ).invoke(obj , (Object)null );
-            System.out.println(field.getName() + " " +field.getType());
+            obj.getClass().getDeclaredMethod("set" + capitalize(field.getName()) , field.getType() ).invoke(obj , (Object) null );
         }
     }
 
@@ -332,31 +331,30 @@ public class FrontServlet extends HttpServlet {
                 Method[] listMethod = obj.getClass().getDeclaredMethods();
                 Method m = null;
                 int i = 0;
-                while(!listMethod[i].getName().equals(method)){
+                while( !listMethod[i].getName().equals(method) ){
                     i++;
                 }
                 m = listMethod[i];
-                ModelView view = null;
-
+                
                 String session_value = (String) request.getSession().getAttribute(this.getSessionProfile());
-
-                if(m.isAnnotationPresent(Authentification.class) && !m.getAnnotation(Authentification.class).auth().isEmpty() && !m.getAnnotation(Authentification.class).auth().equals(session_value)){
+                
+                if( m.isAnnotationPresent(Authentification.class) && !m.getAnnotation(Authentification.class).auth().isEmpty() && !m.getAnnotation(Authentification.class).auth().equals(session_value) ){
                     throw new Exception("Please authentificate yourself<br>");
                 }
+                ModelView view = null;
 
                 ArrayList<Object> args = new ArrayList<Object>();
-
                 // Verify if there are data sent
-                if(request.getParameterNames().nextElement() != null){
+                if( request.getParameterNames().hasMoreElements()    ){
                     obj = setDynamic(request , map.getClassName() , obj);
                     args = getFunctionArgument( request , m);
                 }
-                if(m.isAnnotationPresent(Json.class)){
+                if( m.isAnnotationPresent(Json.class) ){
                     out.print( new Gson().toJson(m.invoke(obj , args.toArray())));
                 }else{
                     
                     //Ajout de session dans la classe instancee
-                    if(m.isAnnotationPresent(Session.class)){
+                    if( m.isAnnotationPresent(Session.class) ){
                         HttpSession session = request.getSession();
                         ArrayList<String> lstTemp = Collections.list(session.getAttributeNames());
                         HashMap<String,Object> lst = new HashMap<String,Object>();  
@@ -411,7 +409,6 @@ public class FrontServlet extends HttpServlet {
                         request.getRequestDispatcher(view.getUrl()).forward(request,response);
                     }
                 }
-                request.getRequestDispatcher(view.getUrl()).forward(request,response);
             }
         }catch(Exception e){
             e.printStackTrace(out);

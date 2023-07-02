@@ -1,6 +1,5 @@
 package etu2060.framework;
 
-
 public class Mapping {
     String className;
     String methods;
