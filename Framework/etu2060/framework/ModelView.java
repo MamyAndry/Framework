@@ -8,12 +8,9 @@ public class ModelView {
     String url;
     HashMap<String,Object> data = new HashMap<String,Object>();
     HashMap<String,Object> session = new HashMap<String,Object>();
-<<<<<<< Updated upstream
-=======
     boolean isJson;
     boolean invalidateSession = false;
     List<String> sessionToDelete = new ArrayList<String>();
->>>>>>> Stashed changes
 
 //GETTERS
     public String getUrl() {
@@ -24,6 +21,9 @@ public class ModelView {
     }
     public HashMap<String, Object> getSession(){
         return this.data;
+    }
+    public boolean getIsJson(){
+        return this.getIsJson();
     }
 
 //SETTERS
@@ -36,16 +36,12 @@ public class ModelView {
     public void setSession(HashMap<String, Object> session) {
         this.session = session;
     }
-<<<<<<< Updated upstream
-
-=======
     public void setIsJson(boolean b){
         this.isJson = b;
     }
     public List<String> getSessionToDelete() {
         return sessionToDelete;
     }
->>>>>>> Stashed changes
 //CONSTRUCTOR
     public ModelView(String v) {
         this.setUrl(v);
