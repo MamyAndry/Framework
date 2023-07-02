@@ -131,7 +131,6 @@ public class FrontServlet extends HttpServlet {
         HashMap< String , Mapping > temp = new HashMap<String,Mapping>();
         HashMap< String , Object > single = new HashMap< String , Object >();
         try{
-            // System.out.println("modelPackage = " + getInitParameter("modelPackage"));
             ArrayList<String> list = getClasses(getInitParameter("modelPackage").trim());
             String sessName = getInitParameter("Session_name").trim();
             String sessProf = getInitParameter("Session_profile").trim();
@@ -150,11 +149,10 @@ public class FrontServlet extends HttpServlet {
                     }
                 }
                Method[] methods = obj.getDeclaredMethods();
-               //        System.out.println(classes.size());
-               for(Method m : methods){
-                   if(m.isAnnotationPresent(Url.class)){
-                       Url annotation = m.getAnnotation(Url.class);
-                       temp.put(annotation.url(),new Mapping(element ,m.getName()));
+               for(Method method : methods){
+                   if(method.isAnnotationPresent(Url.class)){
+                       Url annotation = method.getAnnotation(Url.class);
+                       temp.put(annotation.url(),new Mapping(element ,method.getName()));
                    }
                }
             }
@@ -218,7 +216,7 @@ public class FrontServlet extends HttpServlet {
         return res;
     } 
     
-    public ArrayList<Object> getFunctionArgument(HttpServletRequest request , Method method) throws Exception{
+    public ArrayList<Object> getFunctionArgument(HttpServletRequest request , Object obj ,  Method method) throws Exception{
         ArrayList<Object> lst = new ArrayList<Object>();
         Parameter[] param = method.getParameters();
         ArrayList<String> list = getListOfParameterNames(request);
@@ -226,10 +224,14 @@ public class FrontServlet extends HttpServlet {
             for(int i = 0 ; i < param.length ; i++){
                 if(attribut.contains("[]") && param[i].getName().equals(attribut.subSequence(0, attribut.toCharArray().length - 2))){
                         String[] value = request.getParameterValues(attribut);
-                        Class<?> fieldType = param[i].getClass().getDeclaredFields()[i].getType();
+                        Class<?> fieldType = obj.getClass().getDeclaredFields()[i].getType();
                         Class<?> componentClass = fieldType.getComponentType();
+                        System.out.println("attribut = " + param[i].getClass());                        
+                        System.out.println("fieldType = " + fieldType);
+                        System.out.println("componentClass = " + componentClass);
                         Object temp = Array.newInstance(componentClass , value.length);
                         for(int j = 0 ; j < value.length ; j++){
+                            System.out.println("value = " + value[j] ); 
                             Array.set( temp , j , componentClass.getDeclaredConstructor(String.class).newInstance(value[j]));
                         }
                         lst.add(temp);
@@ -261,6 +263,7 @@ public class FrontServlet extends HttpServlet {
             for(int i = 0 ; i < obj.getClass().getDeclaredFields().length ; i++){
                 if(attribut.contains("[]") && obj.getClass().getDeclaredFields()[i].getName().equals(attribut.subSequence(0, attribut.toCharArray().length - 2))){
                     String[] value = request.getParameterValues(attribut);
+                    System.out.println(attribut);
                     Class<?> fieldType = obj.getClass().getDeclaredFields()[i].getType();
                     Class<?> componentClass = fieldType.getComponentType();
                     Object temp = Array.newInstance(componentClass , value.length);
@@ -293,28 +296,22 @@ public class FrontServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
-        // out.println("<!DOCTYPE html>");
-        // out.println("<html>");
-        // out.println("<head>");
-        // out.println("<title>FrontServlet</title>");
-        // out.println("</head>");
-        // out.println("<body>");
-        // out.println("<h3>Servlet FrontServlet at " + request.getContextPath() + "</h3>");
         try{
             String[] values = request.getRequestURI().split("/");
             Object obj = null;
             String key = values[values.length-1];
-            // out.print("<p>");
-            // out.println(this.getMappingUrls());
-            // out.print("</p>");
+            out.print("<p>");
+            out.println(this.getMappingUrls());
+            out.print("</p>");
             // out.print("<p>");
             // out.println(this.getSingleton());
             // out.print("</p>");
 
             if(this.getMappingUrls().containsKey(key)){
                 Mapping map = this.getMappingUrls().get(key);
-                String method = map.getMethods();
+                String methodstr = map.getMethods();
                 String keySingleton = map.getClassName();
+
                 if(this.getSingleton().containsKey(keySingleton)){
                     Object instance = this.getSingleton().get(keySingleton);
                     if(instance == null){
@@ -326,19 +323,21 @@ public class FrontServlet extends HttpServlet {
                         obj = Class.forName(keySingleton).getConstructor().newInstance();
                         setDefault(obj);
                     }
-                }
-                else obj = Class.forName(keySingleton).getConstructor().newInstance();
+                }else obj = Class.forName(keySingleton).getConstructor().newInstance();
+
                 Method[] listMethod = obj.getClass().getDeclaredMethods();
-                Method m = null;
+                Method method = null;
                 int i = 0;
-                while( !listMethod[i].getName().equals(method) ){
+
+                while( !listMethod[i].getName().equals(methodstr) ){
                     i++;
                 }
-                m = listMethod[i];
+
+                method = listMethod[i];
                 
                 String session_value = (String) request.getSession().getAttribute(this.getSessionProfile());
                 
-                if( m.isAnnotationPresent(Authentification.class) && !m.getAnnotation(Authentification.class).auth().isEmpty() && !m.getAnnotation(Authentification.class).auth().equals(session_value) ){
+                if( method.isAnnotationPresent(Authentification.class) && !method.getAnnotation(Authentification.class).auth().isEmpty() && !method.getAnnotation(Authentification.class).auth().equals(session_value) ){
                     throw new Exception("Please authentificate yourself<br>");
                 }
                 ModelView view = null;
@@ -347,14 +346,14 @@ public class FrontServlet extends HttpServlet {
                 // Verify if there are data sent
                 if( request.getParameterNames().hasMoreElements()    ){
                     obj = setDynamic(request , map.getClassName() , obj);
-                    args = getFunctionArgument( request , m);
+                    args = getFunctionArgument( request , obj , method);
                 }
-                if( m.isAnnotationPresent(Json.class) ){
-                    out.print( new Gson().toJson(m.invoke(obj , args.toArray())));
+                if( method.isAnnotationPresent(Json.class) ){
+                    out.print( new Gson().toJson(method.invoke(obj , args.toArray())));
                 }else{
                     
                     //Ajout de session dans la classe instancee
-                    if( m.isAnnotationPresent(Session.class) ){
+                    if( method.isAnnotationPresent(Session.class) ){
                         HttpSession session = request.getSession();
                         ArrayList<String> lstTemp = Collections.list(session.getAttributeNames());
                         HashMap<String,Object> lst = new HashMap<String,Object>();  
@@ -366,11 +365,11 @@ public class FrontServlet extends HttpServlet {
                     }
 
                     
-                    view = (ModelView) m.invoke( obj , args.toArray());
+                    view = (ModelView) method.invoke( obj , args.toArray());
 
                 
                     //Gestion de session
-                    if(m.isAnnotationPresent(Session.class)){
+                    if(method.isAnnotationPresent(Session.class)){
                         HttpSession session 
                         = request.getSession();
                         Method meth = obj.getClass().getDeclaredMethod("get"+capitalize(this.getSessionFields()));

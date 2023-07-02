@@ -7,6 +7,7 @@ find -name '*.java' > src.txt
 mkdir temp
 javac -cp $lib/servlet-api.jar:$lib/gson.jar -d temp @src.txt
 rm src.txt
+cp $lib/gson.jar temp/gson.jar
 cd temp
 jar -cf ../framework.jar .
 cd ../
