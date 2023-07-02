@@ -35,7 +35,6 @@ public class ModelView {
     public void setSession(HashMap<String, Object> session) {
         this.session = session;
     }
-
     public void setIsJson(boolean b){
         this.isJson = b;
     }

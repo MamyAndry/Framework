@@ -286,7 +286,6 @@ public class FrontServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
-
         // out.println("<!DOCTYPE html>");
         // out.println("<html>");
         // out.println("<head>");
@@ -300,7 +299,7 @@ public class FrontServlet extends HttpServlet {
             String key = values[values.length-1];
             // out.print("<p>");
             // out.println(this.getMappingUrls());
-            // out.print("</p>"); ModelView 
+            // out.print("</p>");
             // out.print("<p>");
             // out.println(this.getSingleton());
             // out.print("</p>");
@@ -344,7 +343,6 @@ public class FrontServlet extends HttpServlet {
                     obj = setDynamic(request , map.getClassName() , obj);
                     args = getFunctionArgument( request , m);
                 }
-
                 if(m.isAnnotationPresent(Json.class)){
                     out.print( new Gson().toJson(m.invoke(obj , args.toArray())));
                 }else{
@@ -425,10 +423,5 @@ public class FrontServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         processRequest(request, response);
-    }
-
-    @Override
-    public String getServletInfo() {
-        return "Short description";
     }
 }
