@@ -20,6 +20,9 @@ public class Emp {
     HashMap<String,Object> session;
 
 //SETTERS
+    public void setId(Integer id){
+        this.id = id;
+    }
     public void setNom(String n){
         this.nom = n;
     }
@@ -28,9 +31,6 @@ public class Emp {
     }
     public void setOption(Integer[] c){
         this.option = c;
-    }
-    public void setId(Integer i){
-        this.id = i;
     }
     public void setEmpUpload(FileUpload empUpload) {
         this.empUpload = empUpload;
@@ -123,9 +123,19 @@ public class Emp {
         return m;
     }
 
-    @Json
+    @Json()
     @Url(url = "testJsonAnnotation.do")
-    public Emp testJson(){
+    public Emp testJsonAnnotation(){
         return new Emp("RATSIMBAZAFY","Mamisoa");
+    }
+
+    @Url(url = "testJson.do")
+    public ModelView testJson(){
+        ModelView m = new ModelView(true);
+        HashMap<String,Object> lst = new HashMap<String,Object>();
+        m.addItem("nom","RATSIMBAZAFY");
+        m.addItem("prenom","Mamisoa");
+        m.addItem("ETU",2060);
+        return m;
     }
 }
