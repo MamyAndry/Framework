@@ -23,9 +23,8 @@ public class ModelView {
         return this.data;
     }
     public boolean getIsJson(){
-        return this.getIsJson();
+        return isJson;
     }
-
 //SETTERS
     public void setUrl(String view) {
         this.url = view;
@@ -45,6 +44,9 @@ public class ModelView {
 //CONSTRUCTOR
     public ModelView(String v) {
         this.setUrl(v);
+    }
+    public ModelView(boolean v) {
+        this.setIsJson(v);
     }
     public ModelView(){}
 

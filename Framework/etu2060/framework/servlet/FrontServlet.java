@@ -168,7 +168,7 @@ public class FrontServlet extends HttpServlet {
         }
     }
 
-    public FileUpload uploadTreatment(Collection<Part> lst , Field field){
+    public FileUpload uploadTreatment(Collection<Part> lst , Field field) throws Exception{
         FileUpload res = new FileUpload();
         Part filePart = null; 
         String fieldName = field.getName();
@@ -178,18 +178,15 @@ public class FrontServlet extends HttpServlet {
                 break;
             }
         }
-        try(InputStream input = filePart.getInputStream()){
-            ByteArrayOutputStream buffers = new ByteArrayOutputStream();
-            byte[] buffer = new byte[(int)filePart.getSize()];
-            int read = 0;
-            while( (read = input.read( buffer , 0 , buffer.length)) != -1){
-                buffers.write(buffer, 0, read);
-            }
-            res.setName(getFileName(filePart));
-            res.setBytes(buffers.toByteArray());
-        }catch(Exception e){
-            e.printStackTrace();
+        InputStream input = filePart.getInputStream();
+        ByteArrayOutputStream buffers = new ByteArrayOutputStream();
+        byte[] buffer = new byte[(int)filePart.getSize()];
+        int read = 0;
+        while( (read = input.read( buffer , 0 , buffer.length)) != -1){
+            buffers.write(buffer, 0, read);
         }
+        res.setName(getFileName(filePart));
+        res.setBytes(buffers.toByteArray());
         return res;
     }
 
@@ -206,7 +203,6 @@ public class FrontServlet extends HttpServlet {
     public ArrayList<String> getListOfParameterNames(HttpServletRequest request){
         ArrayList<String> res = new ArrayList<String>();
         Enumeration<String> query = request.getParameterNames();
-        int i = 0;
         while(query.hasMoreElements()){
             String attribut = query.nextElement();
             res.add(attribut);
@@ -216,7 +212,6 @@ public class FrontServlet extends HttpServlet {
     
     public ArrayList<Object> getFunctionArgument(HttpServletRequest request , Method method) throws Exception{
         ArrayList<Object> lst = new ArrayList<Object>();
-        Enumeration<String> query = request.getParameterNames();
         Parameter[] param = method.getParameters();
         ArrayList<String> list = getListOfParameterNames(request);
         for(String attribut : list){
@@ -244,9 +239,9 @@ public class FrontServlet extends HttpServlet {
         return lst;
     }
 
-    public void setDefault(Object obj){
+    public void setDefault(Object obj) throws Exception{
         for( Field field : obj.getClass().getDeclaredFields() ){
-            // obj.getClass().getDeclaredMethod("set" + Helper.turnIntoCapitalLetter(field.getName()) , field.getType().getClass() ).invoke(obj , null);
+            obj.getClass().getDeclaredMethod("set" + Helper.turnIntoCapitalLetter(field.getName()) , field.getType().getClass() ).invoke(obj , (Object)null );
             System.out.println(field.getName() + " " +field.getType());
         }
     }
@@ -348,7 +343,6 @@ public class FrontServlet extends HttpServlet {
                     obj = setDynamic(request , map.getClassName() , obj);
                     args = getFunctionArgument( request , m);
                 }
-                
                 if(m.isAnnotationPresent(Json.class)){
                     out.print( new Gson().toJson(m.invoke(obj , args.toArray())));
                 }else{
@@ -364,14 +358,17 @@ public class FrontServlet extends HttpServlet {
                         Method meth = obj.getClass().getDeclaredMethod("set"+Helper.turnIntoCapitalLetter(this.getSessionFields()), HashMap.class);
                         meth.invoke(obj , lst);
                     }
+
                     
                     view = (ModelView) m.invoke( obj , args.toArray());
+
                 
                     //Gestion de session
                     if(m.isAnnotationPresent(Session.class)){
-                        HttpSession session = request.getSession();
+                        HttpSession session 
+                        = request.getSession();
                         Method meth = obj.getClass().getDeclaredMethod("get"+Helper.turnIntoCapitalLetter(this.getSessionFields()));
-                        HashMap<String,Object> lst = (HashMap<String,Object>)meth.invoke(obj); 
+                        HashMap<String,Object> lst = (HashMap<String , Object>)meth.invoke(obj); 
                         for(String str : lst.keySet()){
                             session.setAttribute(str, lst.get(str));
                         }
