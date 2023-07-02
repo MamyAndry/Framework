@@ -1,12 +1,19 @@
 package etu2060.framework;
 
 import java.util.HashMap;
-
+import java.util.List;
+import java.util.ArrayList;
 
 public class ModelView {
     String url;
     HashMap<String,Object> data = new HashMap<String,Object>();
     HashMap<String,Object> session = new HashMap<String,Object>();
+<<<<<<< Updated upstream
+=======
+    boolean isJson;
+    boolean invalidateSession = false;
+    List<String> sessionToDelete = new ArrayList<String>();
+>>>>>>> Stashed changes
 
 //GETTERS
     public String getUrl() {
@@ -29,7 +36,16 @@ public class ModelView {
     public void setSession(HashMap<String, Object> session) {
         this.session = session;
     }
+<<<<<<< Updated upstream
 
+=======
+    public void setIsJson(boolean b){
+        this.isJson = b;
+    }
+    public List<String> getSessionToDelete() {
+        return sessionToDelete;
+    }
+>>>>>>> Stashed changes
 //CONSTRUCTOR
     public ModelView(String v) {
         this.setUrl(v);
@@ -43,7 +59,15 @@ public class ModelView {
     public void addSessionItem(String key , Object value){
         this.getSession().put(key,value);
     }
-
+    public void invalidateSession(){
+        this.invalidateSession = true;
+    }
+    public boolean checkInvalidateSession(){
+        return this.invalidateSession;
+    }
+    public void addSessionToDelete(String del){
+        this.getSessionToDelete().add(del);
+    }
 
 
 

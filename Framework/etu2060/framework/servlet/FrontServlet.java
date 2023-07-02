@@ -382,8 +382,13 @@ public class FrontServlet extends HttpServlet {
                 if(m.isAnnotationPresent(Json.class)){
                     out.print( new Gson().toJson(m.invoke(obj , args.toArray())));
                 }else{
+<<<<<<< Updated upstream
 
                     //Ajout de session
+=======
+                    
+                    //Ajout de session dans la classe instancee
+>>>>>>> Stashed changes
                     if(m.isAnnotationPresent(Session.class)){
                         HttpSession session = request.getSession();
                         ArrayList<String> lstTemp = Collections.list(session.getAttributeNames());
@@ -394,7 +399,12 @@ public class FrontServlet extends HttpServlet {
                         Method meth = obj.getClass().getDeclaredMethod("set"+Helper.turnIntoCapitalLetter(this.getSessionFields()), HashMap.class);
                         meth.invoke(obj , lst);
                     }
+<<<<<<< Updated upstream
                     ModelView view = (ModelView) m.invoke( obj , args.toArray());
+=======
+                    
+                    view = (ModelView) m.invoke( obj , args.toArray());
+>>>>>>> Stashed changes
                 
                     //Gestion de session
                     if(m.isAnnotationPresent(Session.class)){
@@ -405,6 +415,16 @@ public class FrontServlet extends HttpServlet {
                             session.setAttribute(str, lst.get(str));
                         }
 >>>>>>> Stashed changes
+                    }
+                    //Invalidate session
+                    if( view.checkInvalidateSession() ){
+                        request.getSession().invalidate();
+                    }
+
+                    if( !view.getSessionToDelete().isEmpty() ){
+                     for( String str : view.getSessionToDelete()){
+                        request.getSession().removeAttribute(str);
+                     }   
                     }
 
 <<<<<<< Updated upstream

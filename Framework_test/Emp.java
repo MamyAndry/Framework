@@ -22,7 +22,9 @@ public class Emp {
     Integer[] option;
 
     FileUpload empUpload;
+
     HashMap<String,Object> session;
+
 //SETTERS
     public void setNom(String n){
         this.nom = n;
@@ -104,6 +106,14 @@ public class Emp {
         }
     }
 
+
+    @Url(url = "invalidate.do")
+    public ModelView invalidateTest(){
+        ModelView m = new ModelView("testSessionInvalidate.jsp");
+        m.invalidateSession();
+        return m;
+    }
+
     @Session
     @Authentification(auth = "admin")
     @Url(url = "save-emp.do")
@@ -116,30 +126,12 @@ public class Emp {
         m.addItem("option", this.getOption());
         m.addItem("empUpload", this.getEmpUpload());
         this.getSession().put("current", "gg");
-        // Connection con = null;
-        // try{
-        //     con = new DbConnection("mamisoa","prom15","test").connectToPostgres();
-        //     GenericDao.save(con,this);
-        // }
-        // catch(Exception e){
-        //     e.printStackTrace();
-        // }
-        // finally{
-        //     try{
-        //         con.close();
-        //     }catch(Exception ex){}
-        // }
         return m;
     }
 
     @Json
     @Url(url = "testJsonAnnotation.do")
     public Emp testJson(){
-        // ModelView m = new ModelView(true);
-        // HashMap<String,Object> lst = new HashMap<String,Object>();
-        // m.setData(lst);
-        // m.addItem("nom","RATSIMBAZAFY");
-        // m.addItem("prenom","Mamisoa");
         return new Emp("RATSIMBAZAFY","Mamisoa");
     }
 }
