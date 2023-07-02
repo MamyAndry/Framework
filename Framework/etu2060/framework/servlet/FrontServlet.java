@@ -5,12 +5,12 @@ import etu2060.framework.annotation.Scope;
 import etu2060.framework.annotation.Session;
 import etu2060.framework.annotation.Json;
 import etu2060.framework.annotation.Authentification;
-import etu2060.framework.FileUpload;
+
 import etu2060.framework.Mapping;
 import etu2060.framework.ModelView;
+import etu2060.framework.FileUpload;
 
 import java.lang.reflect.*;
-import helper.Helper;
 
 import jakarta.servlet.http.Part;
 import jakarta.servlet.ServletException;
@@ -88,9 +88,12 @@ public class FrontServlet extends HttpServlet {
     }
 
 //METHODS
+    public static String capitalize(String text){
+        return text.substring(0,1).toUpperCase().concat(text.substring(1));
+    }
+
     public ArrayList<String> findClasses(File directory, String packageName) throws ClassNotFoundException {
         ArrayList<String> classes = new ArrayList<String>();
-//        System.out.println("directory : "+directory+" packageName : "+packageName);
         if (!directory.exists()){
             return classes;
         }
@@ -246,7 +249,7 @@ public class FrontServlet extends HttpServlet {
 
     public void setDefault(Object obj) throws Exception{
         for( Field field : obj.getClass().getDeclaredFields() ){
-            obj.getClass().getDeclaredMethod("set" + Helper.turnIntoCapitalLetter(field.getName()) , field.getType().getClass() ).invoke(obj , (Object)null );
+            obj.getClass().getDeclaredMethod("set" + capitalize(field.getName()) , field.getType().getClass() ).invoke(obj , (Object)null );
             System.out.println(field.getName() + " " +field.getType());
         }
     }
@@ -265,19 +268,19 @@ public class FrontServlet extends HttpServlet {
                     for(int j = 0 ; j < value.length ; j++){
                         Array.set( temp , j , componentClass.getDeclaredConstructor(String.class).newInstance(value[j]));
                     }   
-                    obj.getClass().getDeclaredMethod("set" + Helper.turnIntoCapitalLetter(attribut.subSequence(0, attribut.toCharArray().length - 2).toString()) , fieldType ).invoke( obj , temp );
+                    obj.getClass().getDeclaredMethod("set" + capitalize(attribut.subSequence(0, attribut.toCharArray().length - 2).toString()) , fieldType ).invoke( obj , temp );
                 }else{
                     if(obj.getClass().getDeclaredFields()[i].getType().getName().equals("etu2060.framework.FileUpload")){
                         try{
                             FileUpload fu = uploadTreatment(request.getParts(), obj.getClass().getDeclaredFields()[i]);
-                            obj.getClass().getDeclaredMethod("set" + Helper.turnIntoCapitalLetter(obj.getClass().getDeclaredFields()[i].getName()) , obj.getClass().getDeclaredFields()[i].getType() ).invoke( obj , fu );
+                            obj.getClass().getDeclaredMethod("set" + capitalize(obj.getClass().getDeclaredFields()[i].getName()) , obj.getClass().getDeclaredFields()[i].getType() ).invoke( obj , fu );
                         }catch(Exception e){} 
                     }else{
                         String value = request.getParameter(attribut);
                         if(obj.getClass().getDeclaredFields()[i].getName().equals(attribut)){
                             Class<?> fieldType = obj.getClass().getDeclaredFields()[i].getType();
                             Object temp = fieldType.getDeclaredConstructor(String.class).newInstance(value);
-                            obj.getClass().getDeclaredMethod("set" + Helper.turnIntoCapitalLetter(attribut) , fieldType ).invoke( obj , temp );
+                            obj.getClass().getDeclaredMethod("set" + capitalize(attribut) , fieldType ).invoke( obj , temp );
                             break;
                         }
                     }
@@ -360,7 +363,7 @@ public class FrontServlet extends HttpServlet {
                         for(String str : lstTemp){
                             lst.put(str, session.getAttribute(str));
                         }
-                        Method meth = obj.getClass().getDeclaredMethod("set"+Helper.turnIntoCapitalLetter(this.getSessionFields()), HashMap.class);
+                        Method meth = obj.getClass().getDeclaredMethod("set"+capitalize(this.getSessionFields()), HashMap.class);
                         meth.invoke(obj , lst);
                     }
 
@@ -372,7 +375,7 @@ public class FrontServlet extends HttpServlet {
                     if(m.isAnnotationPresent(Session.class)){
                         HttpSession session 
                         = request.getSession();
-                        Method meth = obj.getClass().getDeclaredMethod("get"+Helper.turnIntoCapitalLetter(this.getSessionFields()));
+                        Method meth = obj.getClass().getDeclaredMethod("get"+capitalize(this.getSessionFields()));
                         HashMap<String,Object> lst = (HashMap<String , Object>)meth.invoke(obj); 
                         for(String str : lst.keySet()){
                             session.setAttribute(str, lst.get(str));

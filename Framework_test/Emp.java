@@ -4,8 +4,6 @@ import etu2060.framework.annotation.*;
 import etu2060.framework.FileUpload;
 import etu2060.framework.ModelView;
 import java.util.HashMap;
-import dao.*;
-import java.sql.*;
 
 @Scope(isSingleton = "singleton")
 public class Emp {

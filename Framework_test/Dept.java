@@ -1,6 +1,6 @@
 package sorona;
 
-import annotation.Url;
+import etu2060.framework.annotation.Url;
 import etu2060.framework.ModelView;
 import java.util.HashMap;
 

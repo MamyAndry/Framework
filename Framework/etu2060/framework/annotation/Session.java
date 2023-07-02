@@ -1,4 +1,4 @@
-package annotation;
+package etu2060.framework.annotation;
 
 import java.lang.annotation.*;
 
