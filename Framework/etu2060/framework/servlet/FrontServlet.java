@@ -1,15 +1,17 @@
 package etu2060.framework.servlet;
 
-import annotation.Url;
-import annotation.Scope;
-import annotation.Session;
-import annotation.Json;
-import annotation.Authentification;
+import etu2060.framework.annotation.Url;
+import etu2060.framework.annotation.Scope;
+import etu2060.framework.annotation.Session;
+import etu2060.framework.annotation.Json;
+import etu2060.framework.annotation.Authentification;
 import etu2060.framework.FileUpload;
 import etu2060.framework.Mapping;
-import java.lang.reflect.*;
 import etu2060.framework.ModelView;
+
+import java.lang.reflect.*;
 import helper.Helper;
+
 import jakarta.servlet.http.Part;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -17,22 +19,25 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.annotation.*;
+
 import java.io.PrintWriter;
-import java.util.HashMap;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Method;
+import java.io.InputStream;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+
+import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.io.InputStream;
+
 import com.google.gson.Gson;
 
 @MultipartConfig(
