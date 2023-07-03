@@ -29,7 +29,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-
+import java.sql.Date;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -226,9 +226,6 @@ public class FrontServlet extends HttpServlet {
                         String[] value = request.getParameterValues(attribut);
                         Class<?> fieldType = obj.getClass().getDeclaredFields()[i].getType();
                         Class<?> componentClass = fieldType.getComponentType();
-                        System.out.println("attribut = " + param[i].getClass());                        
-                        System.out.println("fieldType = " + fieldType);
-                        System.out.println("componentClass = " + componentClass);
                         Object temp = Array.newInstance(componentClass , value.length);
                         for(int j = 0 ; j < value.length ; j++){
                             System.out.println("value = " + value[j] ); 
@@ -237,11 +234,13 @@ public class FrontServlet extends HttpServlet {
                         lst.add(temp);
                         break;
                 }else{
-                        String value = request.getParameter(attribut);
                     if(param[i].getName().equals(attribut)){
                         Class<?> fieldType = param[i].getType();
-                        Object temp = fieldType.getDeclaredConstructor(String.class).newInstance(value);
-                        lst.add(temp);
+                        if(fieldType.getName().equals("java.sql.Date")){
+                            lst.add(Date.valueOf(request.getParameter(attribut).trim()));
+                        }else{
+                            lst.add(fieldType.getDeclaredConstructor(String.class).newInstance(request.getParameter(attribut).trim()));
+                        }
                     }
                 }
             }
@@ -257,10 +256,10 @@ public class FrontServlet extends HttpServlet {
 
     public Object setDynamic(HttpServletRequest request , String className , Object obj) throws Exception{
         ArrayList<String> lst = getListOfParameterNames(request);
-
-        // System.out.println(lst.size());
+        System.out.println(lst);
         for(String attribut : lst){
             for(int i = 0 ; i < obj.getClass().getDeclaredFields().length ; i++){
+                //Check if the input is a checkbox type
                 if(attribut.contains("[]") && obj.getClass().getDeclaredFields()[i].getName().equals(attribut.subSequence(0, attribut.toCharArray().length - 2))){
                     String[] value = request.getParameterValues(attribut);
                     System.out.println(attribut);
@@ -271,19 +270,24 @@ public class FrontServlet extends HttpServlet {
                         Array.set( temp , j , componentClass.getDeclaredConstructor(String.class).newInstance(value[j]));
                     }   
                     obj.getClass().getDeclaredMethod("set" + capitalize(attribut.subSequence(0, attribut.toCharArray().length - 2).toString()) , fieldType ).invoke( obj , temp );
+                
                 }else{
+                    //Check if the input is a file type
                     if(obj.getClass().getDeclaredFields()[i].getType().getName().equals("etu2060.framework.FileUpload")){
-                        try{
                             FileUpload fu = uploadTreatment(request.getParts(), obj.getClass().getDeclaredFields()[i]);
                             obj.getClass().getDeclaredMethod("set" + capitalize(obj.getClass().getDeclaredFields()[i].getName()) , obj.getClass().getDeclaredFields()[i].getType() ).invoke( obj , fu );
-                        }catch(Exception e){} 
+                    
                     }else{
-                        String value = request.getParameter(attribut);
+                        
                         if(obj.getClass().getDeclaredFields()[i].getName().equals(attribut)){
                             Class<?> fieldType = obj.getClass().getDeclaredFields()[i].getType();
-                            Object temp = fieldType.getDeclaredConstructor(String.class).newInstance(value);
-                            obj.getClass().getDeclaredMethod("set" + capitalize(attribut) , fieldType ).invoke( obj , temp );
-                            break;
+                            if(fieldType.getName().equals("java.sql.Date")){
+                                obj.getClass().getDeclaredMethod("set" + capitalize(attribut) , fieldType ).invoke( obj , Date.valueOf(request.getParameter(attribut).trim()) );
+                            }else{
+                                Object temp = fieldType.getDeclaredConstructor(String.class).newInstance(request.getParameter(attribut).trim());
+                                obj.getClass().getDeclaredMethod("set" + capitalize(attribut) , fieldType ).invoke( obj , temp );
+                                break;
+                            }
                         }
                     }
                 }
@@ -300,9 +304,9 @@ public class FrontServlet extends HttpServlet {
             String[] values = request.getRequestURI().split("/");
             Object obj = null;
             String key = values[values.length-1];
-            out.print("<p>");
-            out.println(this.getMappingUrls());
-            out.print("</p>");
+            // out.print("<p>");
+            // out.println(this.getMappingUrls());
+            // out.print("</p>");
             // out.print("<p>");
             // out.println(this.getSingleton());
             // out.print("</p>");
@@ -410,6 +414,7 @@ public class FrontServlet extends HttpServlet {
                 }
             }
         }catch(Exception e){
+            out.print("<Script> alert("+e.getMessage()+")< /script>");
             e.printStackTrace(out);
         }
         out.println("</body>");
