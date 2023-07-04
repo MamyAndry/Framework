@@ -414,7 +414,8 @@ public class FrontServlet extends HttpServlet {
                 }
             }
         }catch(Exception e){
-            out.print("<Script> alert("+e.getMessage()+")< /script>");
+            out.print("<script> alert("+e.getMessage()+")</script>");
+            out.print(e.getMessage()+"<br>");
             e.printStackTrace(out);
         }
         out.println("</body>");
